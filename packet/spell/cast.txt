@@ -1,0 +1,80 @@
+package spell
+
+import (
+	"github.com/Gophercraft/core/guid"
+	"github.com/Gophercraft/core/packet"
+	"github.com/Gophercraft/core/vsn"
+)
+
+
+
+
+type CastData struct {
+	CasterGUID        guid.GUID
+	CasterUnit        guid.GUID
+	ID                uint8
+	SpellID           uint32
+	Flags             CastFlags
+	CastTime          uint64
+	HitTargets        []guid.GUID
+	MissStatus        []MissStatus
+	Target            TargetData
+	RemainingPower    uint32
+	RemainingRunes    *RuneData
+	MissileTrajectory *MissileTrajectoryResult
+	Ammo              *AmmoData
+	Immunities        *CreatureImmunities
+}
+
+func (cd *CastData) Encode(build vsn.Build, out *packet.WorldPacket) error {
+	cd.CasterGUID.EncodePacked(build, out)
+	cd.CasterUnit.EncodePacked(build, out)
+	out.WriteByte(cd.ID)
+	out.WriteUint32(cd.SpellID)
+	out.WriteUint32(uint32(cd.Flags))
+
+	if build.AddedIn(15005) {
+		out.WriteUint64(cd.CastTime)
+	} else {
+		out.WriteUint32(uint32(cd.CastTime))
+	}
+
+	if out.Type == packet.SMSG_SPELL_GO {
+		out.WriteByte(uint8(len(cd.HitTargets)))
+		for _, hitTarget := range cd.HitTargets {
+			hitTarget.EncodeUnpacked(build, out)
+		}
+		out.WriteByte(uint8(len(cd.MissStatus)))
+		for _, miss := range cd.MissStatus {
+			if err := miss.Encode(build, out); err != nil {
+				return err
+			}
+		}
+	}
+
+	if err := cd.Target.Encode(build, out); err != nil {
+		return err
+	}
+
+	if cd.Flags&PredictedPower != 0 {
+		out.WriteUint32(cd.RemainingPower)
+	}
+
+	if cd.Flags&RuneInfo != 0 {
+		if err := cd.RemainingRunes.Encode(build, out); err != nil {
+			return err
+		}
+	}
+
+	if cd.Flags&HasTrajectory != 0 {
+		if err := cd.MissileTrajectory.Encode(build, out); err != nil {
+			return err
+		}
+	}
+
+	if cd.Flags&Immunity != 0 {
+		if err := cd.Immunities.Encode(build, out); err != nil {
+			return err
+		}
+	}
+}

@@ -1,0 +1,144 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+option go_package = "../rpcnet";
+
+enum Status {
+    OK = 0;
+    Unauthorized = 1;
+    Offline = 2;
+    Disabled = 3;
+    Ratelimited = 4;
+    MaxResourceReached = 5;
+}
+
+enum Tier {
+	NormalPlayer = 0;
+	Privileged = 1;
+	GameMaster = 2;
+	Admin = 3;
+}
+
+message StatusMsg {
+    Status Status = 1;
+}
+
+message VersionData {
+    string CoreVersion = 1;
+}
+
+message PingMsg {
+    uint64 Time = 1;
+}
+
+// Sent from realm to auth server upon a player connection.
+message VerifyWorldQuery {
+    uint64 RealmID = 1;
+    uint32 Build = 2;
+    string Account = 3;
+    string IP = 4;
+    bytes  Digest = 5;
+    bytes  Seed = 6;
+    bytes  Salt = 7;
+    string GameAccount = 8;
+}
+
+message VerifyWorldResponse {
+    Status Status = 1;
+    Tier   Tier = 2;
+    bytes  SessionKey = 3;  
+    uint64 Account = 4;
+    uint64 GameAccount = 5;
+    uint32 Locale = 6;
+}
+
+message AnnounceRealmMsg {
+    uint64 RealmID = 1;
+    uint32 Type = 2;
+    string RealmName = 3;
+    string RealmDescription = 4;
+    uint32 Build = 5;
+    string Address = 6;
+    string RedirectAddress = 7;
+    uint32 ActivePlayers = 8;
+    uint32 TotalPlayers = 9;
+    uint32 Timezone = 10;
+}
+
+message Credentials {
+    string Account = 1;
+    string Password = 2;
+}
+
+message SessionInfo {
+    Status Status = 1;
+    Tier   Tier = 2;
+    string WebToken = 3;
+}
+
+message EnlistRealmRequest {
+    string WebToken = 1;
+    string RealmName = 2;
+    string RealmFingerprint = 3;
+}
+
+message EnlistRealmResponse {
+    Status Status = 1;
+    uint64 RealmID = 2;
+}
+
+enum SupportDomain {
+    Other = 0;
+    Website = 1;
+    Realm = 2;
+}
+
+enum SupportType {
+    Suggestion = 0;
+    BugReport = 1;
+    UserReport = 2;
+}
+
+message SupportTicket {
+    SupportDomain Domain = 1;
+    SupportType Type = 2;
+    uint64      RealmID = 3;
+    uint64      Time = 4;
+    uint64      Account = 5; // Must be a valid account ID
+    uint64      GameAccount = 6; // zero if not applicable
+    uint64      Player = 7; // zero if not applicable
+    string      ReportText = 8;
+}
+
+message TicketSubmissionResult {
+    string TicketID = 1;
+}
+
+message TicketQuery {
+    string WebToken = 1;
+    // 
+    uint32 DomainMask = 2;
+    uint32 TypeMask = 3;
+    int64  RealmID = 4;
+}
+
+message TicketEntry {
+    string ID = 1;
+    SupportTicket Ticket = 2;
+}
+
+message TicketQueryResponse {
+    repeated TicketEntry Entries = 1;
+}
+
+service HomeService {
+    rpc SignIn(Credentials) returns (SessionInfo) {}
+    rpc GetVersionData(google.protobuf.Empty) returns (VersionData) {}
+    rpc Ping(PingMsg) returns (PingMsg) {}
+    rpc AnnounceRealm(AnnounceRealmMsg) returns (StatusMsg) {}
+    rpc VerifyWorld(VerifyWorldQuery) returns (VerifyWorldResponse) {}
+    rpc EnlistRealm(EnlistRealmRequest) returns (EnlistRealmResponse) {}
+    rpc SubmitTicket(SupportTicket) returns (TicketSubmissionResult) {}
+    rpc QueryTickets(TicketQuery) returns (TicketQueryResponse) {}
+}

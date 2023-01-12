@@ -1,0 +1,1 @@
+protoc -I rpcnet rpcnet/RpcNet.proto --go-grpc_out=rpcnet
