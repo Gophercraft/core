@@ -8,12 +8,12 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"unicode"
 
 	"github.com/Gophercraft/core/format/dbc/dbd"
 	"github.com/cybriq/gotiny"
-	"github.com/superp00t/etc"
 )
 
 func handle(err error) {
@@ -36,10 +36,10 @@ func putWarning(wr io.Writer) {
 }
 
 func main() {
-	dbfolder := etc.Path{"format", "dbc", "dbdefs"}
+	dbfolder := filepath.Join("format", "dbc", "dbdefs")
 
-	p := dbfolder.Concat("packed_definitions_autogen.go").Render()
-	ep := dbfolder.Concat("entities.go").Render()
+	p := filepath.Join(dbfolder, "packed_definitions_autogen.go")
+	ep := filepath.Join(dbfolder, "entities.go")
 	file, err := os.Create(p)
 	handle(err)
 	putWarning(file)
@@ -93,7 +93,7 @@ func main() {
 		deff.Close()
 
 		alldefs = append(alldefs, def)
-		defmap[def.Name] = def
+		defmap[strings.ToLower(def.Name)] = def
 	}
 
 	// sort.Slice(alldefs, func(i, j int) bool {

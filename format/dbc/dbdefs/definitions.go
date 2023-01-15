@@ -3,7 +3,9 @@ package dbdefs
 import (
 	"bytes"
 	"compress/zlib"
+	"fmt"
 	"io/ioutil"
+	"strings"
 
 	"github.com/Gophercraft/core/format/dbc/dbd"
 	"github.com/cybriq/gotiny"
@@ -27,4 +29,22 @@ func init() {
 	}
 
 	gotiny.Unmarshal(b, &All)
+}
+
+func Lookup(name string) (*dbd.Definition, error) {
+	index := strings.ToLower(name)
+	def, ok := All[index]
+	if !ok {
+		return nil, fmt.Errorf("dbdefs: could not find %s definition", name)
+	}
+
+	return def, nil
+}
+
+func Register(def *dbd.Definition) (alreadyRegistered bool) {
+	index := strings.ToLower(def.Name)
+
+	_, alreadyRegistered = All[index]
+	All[index] = def
+	return
 }

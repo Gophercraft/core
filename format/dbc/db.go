@@ -20,30 +20,7 @@ func NewDB(v vsn.Build) *DB {
 }
 
 func (db *DB) lookupDef(name string) (*dbd.Definition, error) {
-	alldefs := dbdefs.All
-
-	// // Fast binary search
-	// i := sort.Search(len(alldefs), func(i int) bool {
-	// 	return alldefs[i].Name >= name
-	// })
-
-	// if i < len(alldefs) && alldefs[i].Name == name {
-	// 	return &alldefs[i], nil
-	// }
-
-	// // could be that defs are not sorted, slooow search
-	// for i := range alldefs {
-	// 	if alldefs[i].Name == name {
-	// 		return &alldefs[i], nil
-	// 	}
-	// }
-
-	def, ok := alldefs[name]
-	if !ok {
-		return nil, fmt.Errorf("dbc: no such definition for table %s", name)
-	}
-
-	return def, nil
+	return dbdefs.Lookup(name)
 }
 
 func (db *DB) detectLayout(table *Table) error {
