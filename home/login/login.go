@@ -31,10 +31,6 @@ func SetAccount(acc *models.Account, username, password string, tier rpcnet.Tier
 		return err
 	}
 
-	if password == "" {
-		return ErrPasswordCannotBeEmpty
-	}
-
 	acc.Username = username
 	acc.Tier = tier
 	acc.IdentityHash = srp.HashCredentials(
