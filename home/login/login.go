@@ -27,7 +27,7 @@ func SetAccount(acc *models.Account, username, password string, tier rpcnet.Tier
 		return err
 	}
 
-	if err := UsernameValidate(password); err != nil {
+	if err := UsernameValidate(username); err != nil {
 		return err
 	}
 
