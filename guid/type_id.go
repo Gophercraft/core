@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/Gophercraft/core/vsn"
+	"github.com/Gophercraft/core/version"
 )
 
 //go:generate gcraft_stringer -type=TypeID
@@ -32,8 +32,8 @@ const (
 type TypeIDDescriptor map[TypeID]uint8
 
 var (
-	TypeIDDescriptors = map[vsn.Build]TypeIDDescriptor{
-		vsn.Alpha: {
+	TypeIDDescriptors = map[version.Build]TypeIDDescriptor{
+		version.Alpha: {
 			TypeObject:    0,
 			TypeItem:      1,
 			TypeContainer: 2,
@@ -48,12 +48,12 @@ var (
 )
 
 func init() {
-	TypeIDDescriptors[vsn.V1_12_1] = TypeIDDescriptors[vsn.Alpha]
-	TypeIDDescriptors[vsn.V2_4_3] = TypeIDDescriptors[vsn.Alpha]
-	TypeIDDescriptors[vsn.V3_3_5a] = TypeIDDescriptors[vsn.Alpha]
+	TypeIDDescriptors[version.V1_12_1] = TypeIDDescriptors[version.Alpha]
+	TypeIDDescriptors[version.V2_4_3] = TypeIDDescriptors[version.Alpha]
+	TypeIDDescriptors[version.V3_3_5a] = TypeIDDescriptors[version.Alpha]
 }
 
-func DecodeTypeID(version vsn.Build, in io.Reader) (TypeID, error) {
+func DecodeTypeID(version version.Build, in io.Reader) (TypeID, error) {
 	desc, ok := TypeIDDescriptors[version]
 	if !ok {
 		return 0, fmt.Errorf("guid: cannot decode type ID for version %d", version)
@@ -83,7 +83,7 @@ func DecodeTypeID(version vsn.Build, in io.Reader) (TypeID, error) {
 	return resolved, nil
 }
 
-func EncodeTypeID(version vsn.Build, id TypeID, out io.Writer) error {
+func EncodeTypeID(version version.Build, id TypeID, out io.Writer) error {
 	desc, ok := TypeIDDescriptors[version]
 	if !ok {
 		return fmt.Errorf("guid: cannot encode type ID for version %d", version)

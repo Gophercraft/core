@@ -1,0 +1,101 @@
+syntax = "proto3";
+
+package realm;
+
+import "auth.proto";
+
+option go_package = "github.com/Gophercraft/core/home/protocol/pb/realm";
+
+// Enlist(Request) -> Response
+//  Sent by the gophercraft wizard
+//  When attempting to register a new realm
+//  The server will request a new unique ID number be generated for you
+
+message EnlistRequest {
+  // The token you are authenticating with.
+  // the service will check if your account actually has permission to enlist a
+  // realm.
+  string web_token = 1;
+  // The name of your server (must not change to avoid malicious behavior on the
+  // realmlist)
+  string name = 2;
+  // The 64-byte SHA512 fingerprint of your realm's TLS certificate
+  bytes fingerprint = 3;
+}
+
+message EnlistResponse {
+  // The ID of your newly enlisted realm.
+  uint64 id = 1;
+}
+
+// Announce(Request) -> Response
+//   Posts your world server configuration to the realm list
+//   Announcement happens at the startup of the server
+//   To post information from the server's config file
+//   These fields
+message AnnounceRequest {
+  // the ID of the realm server. The Home server will verify the authenticity of this request against the fingerprint of your connecttion
+  uint64 id = 1;
+  // The app/config.RealmType of your realm serverf
+  uint32 type = 2;
+  // Short name e.g. "BelugaBoys"
+  string short_name = 3;
+  // Long form name .e.g. "The Beluga Boys Fanclub Ltd."
+  string long_name = 4;
+  string description = 5;
+  uint32 build = 6;
+  string address = 7;
+  string redirect_address = 8;
+  uint32 active_players = 9;
+  uint32 total_players = 10;
+  uint32 category = 11;
+  // Some servers can be connected to but are not to be displayed in the realm list
+  bool present_in_list = 12;
+  // Some servers are only present in the list if you are of a certain tier
+  auth.AccountTier required_tier = 13;
+}
+
+message AnnounceResponse {}
+
+// Update(Request) -> Response
+//  Sent by the realm server periodically to refresh its connection information
+message UpdateRequest {
+  uint64 id = 1;
+  string address = 2;
+  string redirect_address = 3;
+  uint32 active_players = 4;
+  uint32 total_players = 5;
+}
+
+message UpdateResponse {}
+
+message CharacterCountData {
+  uint64 realm_id = 1;
+  uint64 game_account = 2;
+  uint64 character_count = 3;
+}
+
+message CharacterLoggedInData {
+  uint64 realm_id = 1;
+  uint64 game_account_id = 2;
+  // the "counter" part of the character's GUID, you can get the full GUID by
+  // combining with RealmID
+  uint64 character_id = 3;
+  // the character's display name
+  string character_name = 4;
+  uint32 last_played_time = 5;
+}
+
+message SaveResponse {}
+
+// this server check the ECDSA fingerprint of the caller to determine
+// if the calls are valid
+service RealmService {
+  rpc Enlist(EnlistRequest) returns (EnlistResponse) {}
+  rpc Announce(AnnounceRequest) returns (AnnounceResponse) {}
+  rpc Update(UpdateRequest) returns (UpdateResponse) {}
+  // Sent whenever the character list is changed
+  rpc SaveCharacterCount(CharacterCountData) returns (SaveResponse) {}
+  // Sent whenever a character logs in
+  rpc SaveLastCharacterLoggedIn(CharacterLoggedInData) returns (SaveResponse) {}
+}

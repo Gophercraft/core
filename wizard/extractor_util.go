@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/Gophercraft/core/datapack"
-	"github.com/Gophercraft/core/vsn"
+	"github.com/Gophercraft/core/version"
 )
 
 const exAuthor = "Gophercraft Wizard"
@@ -38,7 +38,7 @@ func (ex *Extractor) AuthorPack(name string, cfg datapack.PackConfig) (*datapack
 
 func (ex *Extractor) dependencies() []string {
 	return []string{
-		"Gophercraft Core " + vsn.GophercraftVersion.String(),
+		"Gophercraft Core " + version.GophercraftVersion.String(),
 		fmt.Sprintf("Running build %d", ex.Source.Build()),
 	}
 }

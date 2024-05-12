@@ -5,53 +5,59 @@ import (
 	"fmt"
 	"text/template"
 
-	"github.com/Gophercraft/core/home/config"
+	"github.com/Gophercraft/core/app/config"
 )
+
+var _ = config.WorldFile{}
 
 const DefaultWorldTemplate = `{
 	// build ID
-	Version {{.Version}}
+	Build {{.Version}}
 
 	// the internal IP address to listen on
-	Listen 0.0.0.0:8085
+	BindGameAddress 0.0.0.0:8085
 	
-	// external address (should be accessible from the client's computer)
-	PublicAddress 127.0.0.1:8085
+	// external address (this is the address the game client connects to)
+	PublicGameAddress 127.0.0.1:8085
 
-	// Redirect 0.0.0.0:9090 // Uncomment these two lines if you are trying to run version 3368
-	// PublicRedirect 0.0.0.0:9090
+	BindCoreAddress 0.0.0.0:32771
 
-	// The display name of your server. You can change this as you please.
-	RealmName "{{.RealmName}}"
+	PublicCoreAddress 127.0.0.1:32771
+
+	// Uncomment these two lines if your version needs a redirect server
+	// Redirect 0.0.0.0:9090
+	// RedirectEndpoint 127.0.0.1:9090
+
+	// The display name of your server. Try not to change this
+	LongName "{{.RealmName}}"
+	
+	ShortName "{{.RealmName}}"
 
 	// The type of server you want to create. A server of the type "RP" will allow for an all-GM roleplaying experience.
 	// Note: changing this value will also change the default WorldVars.
 	// You can always override these with custom values to fine-tune your server to the desired behavior!
-	RealmType RP	
+	Type RP	
 
 	// Description of your server. This will appear in the Gophercraft website.
-	RealmDescription "Put the description for your server here!"
-
-	// If true, auth server admins are not admins on your world.
-	// It's recommended to keep this value false for most servers. 
-	FederalSovereignty false
+	Description "Put the description for your server here!"
 
 	// Editing this can lead to duplicate entries in the realm list.
-	RealmID {{.RealmID}}
+	ID {{.RealmID}}
 
 	// The timezone changes which tab the realm appears under.
 	Timezone "Development"
 
 	// database driver
-	DBDriver "{{.DBDriver}}"
+	WorldDatabaseEngine "leveldb_core"
+	WorldDatabasePath "world_db"
 
-	// database URL
-	DBURL "{{.DBURL}}"
+	CacheDatabaseEngine "leveldb_core"
+	CacheDatabasePath "cache_db"
 
-	// Address of RPC server
-	HomeServer {{.HomeServer}}
+	// Address of Home server
+	HomeServer {{.HomeServerADdress}}
 
-	// RPC server fingerprint
+	// Home server fingerprint
 	HomeServerFingerprint {{.HomeServerFingerprint}}
 
 	// Uncomment to perform CPU usage profiling.
@@ -65,14 +71,11 @@ const DefaultWorldTemplate = `{
 `
 
 type WorldConfigFormatted struct {
-	Version   string
+	Build     string
 	RealmName string
 	RealmID   string
 
-	DBDriver string
-	DBURL    string
-
-	HomeServer            string
+	HomeServerAddress     string
 	HomeServerFingerprint string
 }
 
@@ -90,14 +93,12 @@ func FormatWorldConfig(wcf WorldConfigFormatted) []byte {
 	return buf.Bytes()
 }
 
-func MakeDefaultWorldConfig(conf *config.World) []byte {
+func MakeDefaultWorldConfig(world_config *config.World) []byte {
 	return FormatWorldConfig(WorldConfigFormatted{
-		Version:               fmt.Sprintf("%d", conf.Version),
-		RealmName:             conf.RealmName,
-		RealmID:               fmt.Sprintf("%d", conf.RealmID),
-		DBDriver:              conf.DBDriver,
-		DBURL:                 conf.DBURL,
-		HomeServer:            conf.HomeServer,
-		HomeServerFingerprint: conf.HomeServerFingerprint,
+		Build:                 fmt.Sprintf("%d", world_config.Build),
+		RealmName:             world_config.LongName,
+		RealmID:               fmt.Sprintf("%d", world_config.ID),
+		HomeServerAddress:     world_config.HomeServerAddress,
+		HomeServerFingerprint: world_config.HomeServerFingerprint.String(),
 	})
 }

@@ -1,16 +1,14 @@
 package wizard
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
-	"github.com/Gophercraft/core/home/config"
-	"github.com/Gophercraft/core/home/dbsupport"
+	"github.com/Gophercraft/core/app/config"
 	"github.com/Gophercraft/core/home/login"
 	"github.com/Gophercraft/core/home/models"
-	"github.com/Gophercraft/core/home/rpcnet"
-	"xorm.io/xorm"
+	"github.com/Gophercraft/core/home/protocol/pb/auth"
+	"github.com/Gophercraft/phylactery/database"
 )
 
 type HomeConfigurator struct {
@@ -26,44 +24,49 @@ func (co *Configurator) NewHomeConfigurator() *HomeConfigurator {
 }
 
 func (hc *HomeConfigurator) CreateDB() error {
-	return dbsupport.Create(hc.Config.DBDriver, hc.Config.DBURL)
+	return nil
 }
 
-func (hc *HomeConfigurator) RegisterAccount(username, password string, tier rpcnet.Tier) error {
-	engi, err := xorm.NewEngine(hc.Config.DBDriver, hc.Config.DBURL)
+func (hc *HomeConfigurator) RegisterAccount(username, password string, tier auth.AccountTier) error {
+	var db_path = hc.Config.File.DatabasePath
+	switch hc.Config.File.DatabaseEngine {
+	case "leveldb_core":
+		if !filepath.IsAbs(db_path) {
+			// make path relative to config path
+			db_path = filepath.Join(hc.Config.Directory, hc.Config.File.DatabasePath)
+		}
+	}
+
+	db, err := database.Open(db_path, database.WithEngine(hc.Config.File.DatabaseEngine))
 	if err != nil {
 		return err
 	}
 
-	if err = engi.Sync(
-		new(models.Account),
-		new(models.GameAccount),
-	); err != nil {
+	if err = db.Table("Account").Sync(new(models.Account)); err != nil {
+		return err
+	}
+	if err = db.Table("GameAccount").Sync(new(models.GameAccount)); err != nil {
 		return err
 	}
 
-	if err = login.RegisterAccount(engi, username, password, tier); err != nil {
+	if err = login.RegisterAccount(db, true, auth.AccountTier_ADMIN, "", username, password, tier); err != nil {
 		return err
 	}
 
-	return engi.Close()
-}
-
-func (hc *HomeConfigurator) SetDirName(dirName string) {
-	hc.Config.Dir = filepath.Join(hc.Configurator.Dir, dirName)
+	return db.Close()
 }
 
 func (hc *HomeConfigurator) GenerateConfig() error {
-	if err := os.MkdirAll(hc.Config.Dir, 0700); err != nil {
+	if err := os.MkdirAll(hc.Config.Directory, 0700); err != nil {
 		return err
 	}
 
 	data := MakeDefaultHomeConfig(hc.Config)
-	if err := ioutil.WriteFile(filepath.Join(hc.Config.Dir, "Home.txt"), data, 0700); err != nil {
+	if err := os.WriteFile(filepath.Join(hc.Config.Directory, "home.txt"), data, 0700); err != nil {
 		return err
 	}
 
-	if err := hc.Config.GenerateKeyPair(); err != nil {
+	if err := config.GenerateKeyPair(hc.Config.Directory); err != nil {
 		return err
 	}
 

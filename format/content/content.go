@@ -3,38 +3,50 @@ package content
 
 import (
 	"fmt"
+	"io"
 
-	"github.com/Gophercraft/core/vsn"
-	"github.com/Gophercraft/core/vsn/detection"
+	"github.com/Gophercraft/core/version"
+	"github.com/Gophercraft/core/version/detection"
 )
 
 type Volume interface {
-	Build() vsn.Build
-	ListFiles() ([]string, error)
-	ReadFile(at string) ([]byte, error)
-	Close() error
+	// returns the content.Type
+	Type() Type
+	// returns the build associated with this Volume
+	Build() (build version.Build)
+	// opens a file contained within this Volume
+	Open(path string) (file io.ReadCloser, err error)
+	Close() (err error)
 }
 
-func Open(path string) (Volume, error) {
-	v, err := detection.DetectGame(path)
+func Open(path string) (volume Volume, err error) {
+	var (
+		build        version.Build
+		content_type Type
+		content_path string
+	)
+
+	build, err = detection.DetectGame(path)
 	if err != nil {
 		return nil, err
 	}
 
-	if v == 0 {
-		return nil, fmt.Errorf("cannot read from a game with version: %d", v)
+	if build == 0 {
+		return nil, fmt.Errorf("cannot read from a game with version: %d", build)
 	}
 
-	vt, path2, err := detection.DetectVolumeLocation(path)
+	content_type, content_path, err = detect_content_type(path)
 	if err != nil {
 		return nil, err
 	}
 
-	switch vt {
-	case detection.NGDP:
-		return nil, fmt.Errorf("NGDP nyi")
-	case detection.MPQ:
-		return openMpq(v, path2)
+	switch content_type {
+	case NGDP:
+		return nil, fmt.Errorf("NGDP not net implemented")
+	case MPQ:
+		return open_mpq(build, content_path)
+	case Plain:
+		return open_plain(build, content_path)
 	default:
 		return nil, fmt.Errorf("unknown folder type")
 	}

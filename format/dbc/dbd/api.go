@@ -5,7 +5,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/Gophercraft/core/vsn"
+	"github.com/Gophercraft/core/version"
 )
 
 type ColumnType uint8
@@ -52,8 +52,8 @@ func DecodeDefinition(name string, rd io.Reader) (*Definition, error) {
 
 type Layout struct {
 	Hashes         []string
-	VerifiedBuilds []vsn.Build
-	BuildRanges    []vsn.BuildRange
+	VerifiedBuilds []version.Build
+	BuildRanges    []version.BuildRange
 	Columns        []LayoutColumn
 }
 
@@ -94,16 +94,16 @@ func (lc LayoutColumn) HasOption(name string) bool {
 	return false
 }
 
-func ParseBuildRange(str string) (br vsn.BuildRange, err error) {
+func ParseBuildRange(str string) (br version.BuildRange, err error) {
 	var els []string
 	els = strings.SplitN(str, "-", 2)
-	var v vsn.Build
-	v, err = vsn.ParseDBD(els[0])
+	var v version.Build
+	v, err = version.ParseDBD(els[0])
 	if err != nil {
 		return
 	}
 	br[0] = v
-	v, err = vsn.ParseDBD(els[1])
+	v, err = version.ParseDBD(els[1])
 	if err != nil {
 		return
 	}

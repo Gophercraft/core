@@ -2,24 +2,39 @@ package main
 
 import (
 	"fmt"
-	"io"
+	"log"
 	"os"
 
 	"github.com/Gophercraft/core/datapack"
 	"github.com/Gophercraft/text"
 )
 
-func openFile(out string) *os.File {
-	fmt.Println("Extracting to", out, "...")
-	fl, _ := os.OpenFile(out, os.O_TRUNC|os.O_CREATE|os.O_RDWR, 0700)
-	return fl
+type textFile struct {
+	file *os.File
+	*text.Encoder
 }
 
-func printTimestamp(out io.Writer) {
-	fmt.Fprintf(out, "// DO NOT EDIT: extracted from CMaNGOS database on %s\n", datapack.Timestamp())
+func openTextFile(path string) *textFile {
+	log.Println("Opening", path)
+	tf := new(textFile)
+	var err error
+	tf.file, err = os.OpenFile(path, os.O_TRUNC|os.O_CREATE|os.O_RDWR, 0700)
+	if err != nil {
+		panic(err)
+	}
+	tf.commentf("DO NOT EDIT: extracted from CMaNGOS database on %s", datapack.Timestamp())
+	tf.Encoder = text.NewEncoder(tf.file)
+	return tf
 }
 
-func openTextWriter(out io.Writer) *text.Encoder {
-	j := text.NewEncoder(out)
-	return j
+func (tf *textFile) comment(msg string) {
+	fmt.Fprintf(tf.file, "// %s\n", msg)
+}
+
+func (tf *textFile) commentf(msg string, args ...any) {
+	tf.comment(fmt.Sprintf(msg, args...))
+}
+
+func (tf *textFile) close() {
+	tf.file.Close()
 }

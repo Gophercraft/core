@@ -7,7 +7,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/Gophercraft/core/format/dbc/dbd"
-	"github.com/Gophercraft/core/vsn"
+	"github.com/Gophercraft/core/version"
 	"github.com/davecgh/go-spew/spew"
 )
 
@@ -213,7 +213,7 @@ func (t *Table) indexRow(i int, entity reflect.Value) error {
 
 // Returns the size of this record layout in bytes
 // This is because the size of fields has been known to change from version to version, for instance when localized strings add more locales.
-func (t *Table) SizeCount(v vsn.Build) (int, int, error) {
+func (t *Table) SizeCount(v version.Build) (int, int, error) {
 	sz := int(0)
 	cols := 0
 

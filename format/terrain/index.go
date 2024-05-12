@@ -7,7 +7,7 @@ import (
 	"io"
 
 	"github.com/Gophercraft/core/format/chunked"
-	"github.com/Gophercraft/core/vsn"
+	"github.com/Gophercraft/core/version"
 )
 
 var (
@@ -72,7 +72,7 @@ type MapReader struct {
 	Index
 }
 
-func NewMapReader(src Source, build vsn.Build, name string) (*MapReader, error) {
+func NewMapReader(src Source, build version.Build, name string) (*MapReader, error) {
 	mr := new(MapReader)
 	mr.Name = name
 	mr.Source = src

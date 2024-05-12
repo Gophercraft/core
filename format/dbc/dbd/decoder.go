@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/Gophercraft/core/vsn"
+	"github.com/Gophercraft/core/version"
 )
 
 const eof rune = 0
@@ -176,7 +176,7 @@ func (d *decoder) decodeLayout(w []string) error {
 				// Explicit list of verified builds
 				nocomma(w)
 				for _, str := range w[1:] {
-					v, err := vsn.ParseDBD(str)
+					v, err := version.ParseDBD(str)
 					if err != nil {
 						return err
 					}

@@ -5,55 +5,108 @@ import (
 	"fmt"
 	"text/template"
 
-	"github.com/Gophercraft/core/home/config"
+	"github.com/Gophercraft/core/app/config"
 )
 
 const DefaultHomeTemplate = `{
-	// the TCP/IP address to listen the Gophercraft website on.
-	// You can reverse proxy this however you like.
-	HTTPInternal 0.0.0.0:8086
+	// This block configures the services hosted
+	// by Gophercraft Home, and their addresses
+	HostServices
+	{
+		{
+			// The HTTP API for your Home server.
+			Service web
+			Address 0.0.0.0:32776 
+		}
 
-	// The public hostname of your Gophercraft API server.
-	// if left uncommented, it will be set to localhost
-	// this is needed to tell the client where the REST logon service is located.
-	// 
-	// HostExternal gcraft.example.com
+		{
+			// The GRPC server used to communicate
+			// between services in a Gophercraft network
+			Service core
+			Address 0.0.0.0:32777
+		}
 
-	// The TCP/IP addresses to listen Auth/Realmlist servers on.
-	// Keep these unchanged, unless you really know what you're doing.
-	AuthListen 0.0.0.0:3724 // The address which serves the legacy realmlist server, as well as the GRPC server.
-	BnetListen 0.0.0.0:1119
-	BnetRESTListen 0.0.0.0:1120
+		{
+			// The Grunt login/realmlist service
+			Service grunt
+			Address 0.0.0.0:3724
+		}
 
-	// Database options
-	// the go-xorm SQL driver to use.
-	DBDriver {{.DBDriver}}
+		{
+			// The ancient realm list server.
+			// This should be disabled if you aren't hosting a very old game
+			Service old_realmlist
+			Address 0.0.0.0:9100
+			// Only display realms with this build number
+			Build 3368
+		}
 
-	// the go-xorm SQL URL to use.
-	DBURL {{.DBURL}}
+		{
+			// The Protobuf/TLS-based RPC protocol used by newer clients to request realmlists and find the REST API
+			Service bnet_rpc
+			Address 0.0.0.0:1119
+		}
 
-	OpenRegistration {{.OpenRegistration}}
+		{
+			// The RESTful login API used by BNet to authenticate newer clients
+			Service bnet_rest
+			Address 0.0.0.0:1120
+		}
+	}
 
-	// Alpha: uncomment this to use the Alpha protocol.
-	// AlphaRealmlistListen 0.0.0.0:9100
+	// This block stores the public addresses of
+	// services 
+	ServiceEndpoints
+	{
+		web http://127.0.0.1:32776/
+
+		grunt 127.0.0.1:3724
+		
+		bnet_rpc 127.0.0.1:1119
+
+		bnet_rest 127.0.0.1:1120
+
+		old_realmlist 127.0.0.1:9100
+	}
+
+	// the Phylactery storage engine to use
+	DatabaseEngine {{.DatabaseEngine}}
+
+	// the path of the Phylactery database
+	DatabasePath {{.DatabasePath}}
+
+	// true = anyone can register using the web UI
+	// false = only administrators can register accounts using the 'gophercraft' command
+	OpenRegistration false
+
+	// true = user must confirm their email to use the server
+	EmailVerificationRequired false
+
+	// Methods 
+	TwoFactorAuthMethods
+	{
+		TOTP
+	}
+
+	// true = user will be required to set a 2FA mechanism after first login
+	// false = user is free to 
+	TwoFactorAuthRequired false
 }`
 
-type HomeConfigFormatted struct {
-	DBDriver string
-
-	DBURL string
-
+type home_config_template struct {
+	DatabaseEngine   string
+	DatabasePath     string
 	OpenRegistration string
 }
 
-func FormatHomeConfig(hcf HomeConfigFormatted) []byte {
+func format_home_config(config_template home_config_template) []byte {
 	tmpl, err := template.New("homeconfig").Parse(DefaultHomeTemplate)
 	if err != nil {
 		panic(err)
 	}
 
 	buf := new(bytes.Buffer)
-	if err := tmpl.Execute(buf, hcf); err != nil {
+	if err := tmpl.Execute(buf, config_template); err != nil {
 		panic(err)
 	}
 
@@ -61,9 +114,9 @@ func FormatHomeConfig(hcf HomeConfigFormatted) []byte {
 }
 
 func MakeDefaultHomeConfig(conf *config.Home) []byte {
-	return FormatHomeConfig(HomeConfigFormatted{
-		DBDriver:         conf.DBDriver,
-		DBURL:            conf.DBURL,
-		OpenRegistration: fmt.Sprintf("%t", conf.OpenRegistration),
+	return format_home_config(home_config_template{
+		DatabaseEngine:   conf.File.DatabaseEngine,
+		DatabasePath:     conf.File.DatabasePath,
+		OpenRegistration: fmt.Sprintf("%t", conf.File.OpenRegistration),
 	})
 }

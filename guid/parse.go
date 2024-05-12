@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/Gophercraft/core/vsn"
+	"github.com/Gophercraft/core/version"
 )
 
 func isRealmID(hiBits uint64) bool {
@@ -58,7 +58,7 @@ func Classic(u64 uint64) GUID {
 	return g
 }
 
-func DecodePacked(version vsn.Build, reader io.Reader) (GUID, error) {
+func DecodePacked(version version.Build, reader io.Reader) (GUID, error) {
 	switch {
 	case version < NewFormat:
 		u64 := DecodePacked64(reader)
@@ -70,7 +70,7 @@ func DecodePacked(version vsn.Build, reader io.Reader) (GUID, error) {
 	}
 }
 
-func DecodeUnpacked(version vsn.Build, reader io.Reader) (GUID, error) {
+func DecodeUnpacked(version version.Build, reader io.Reader) (GUID, error) {
 	switch {
 	case version < NewFormat:
 		var bytes [8]byte

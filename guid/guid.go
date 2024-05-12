@@ -7,16 +7,16 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/Gophercraft/core/vsn"
+	"github.com/Gophercraft/core/version"
 )
 
 var (
 	// Nil represents the zero value of a GUID.
 	Nil = GUID{0, 0}
 	// Oldest known revision, unchanged until NewFormat
-	OldFormat vsn.Build = 0
+	OldFormat version.Build = 0
 	// Starting in protocol build 19027, GUIDs have 128 bits instead of 64.
-	NewFormat vsn.Build = 19027
+	NewFormat version.Build = 19027
 )
 
 // GUID or Global Unique Identification number
@@ -175,12 +175,12 @@ func encodeMasked64(value uint64) (uint8, []byte) {
 //	[8]byte{0, 31, 0, 0, 0, 0, 36, 0}
 //
 // The 128-bit format uses the exact same packing scheme, just with a 16-bit mask and up to 16 bytes following it.
-func (g GUID) EncodePacked(version vsn.Build, w io.Writer) {
+func (g GUID) EncodePacked(build version.Build, w io.Writer) {
 	switch {
 	// Packing is not enabled in alpha
-	case version.RemovedIn(vsn.V1_12_1):
-		g.EncodeUnpacked(version, w)
-	case version < NewFormat:
+	case build.RemovedIn(version.V1_12_1):
+		g.EncodeUnpacked(build, w)
+	case build < NewFormat:
 		// Resolve to legacy format
 		mask, bytes := encodeMasked64(g.Classic())
 		w.Write([]byte{mask})
@@ -218,7 +218,7 @@ func (g GUID) Classic() uint64 {
 		//   RealmID uint13 ; GUID can have one of 8192 (2^13) realms IDs Ideally, I would like to allow more, but Bliz thinks this is all anyone should need.
 		//   Counter uint35 ; Amount of characters in the legacy protocol = 0x800000000 or 34,359,738,368 (2^35) This should be more than enough; a conservative estimate of 500 bytes per character would require 2.19 petabytes of storage space to hold all these characters.
 		// }
-		u64 |= uint64(g.RealmID()) << 35
+		u64 |= (uint64(g.RealmID()) & MaxRealmID) << 35
 		// Security risk if counter is allowed to exceed MaxCharactersLegacy
 		u64 |= uint64(g.Counter()) & MaxCharactersLegacy
 	default:
@@ -229,30 +229,16 @@ func (g GUID) Classic() uint64 {
 	return u64
 }
 
-func (g GUID) EncodeUnpacked(version vsn.Build, w io.Writer) error {
+func (g GUID) EncodeUnpacked(build version.Build, w io.Writer) error {
 	switch {
-	case version < NewFormat:
+	case build < NewFormat:
 		e := make([]byte, 8)
 		binary.LittleEndian.PutUint64(e, g.Classic())
 		_, err := w.Write(e)
 		return err
 	default:
-		panic(fmt.Errorf("update: can't encode GUID in unpacked format in version %d", version))
+		panic(fmt.Errorf("update: can't encode GUID in unpacked format in version %d", build))
 	}
-}
-
-func (g GUID) Cmp(g2 GUID) int {
-	if g == g2 {
-		return 2 // exact match.
-	}
-
-	if g.HighType() == Player {
-		if g.Counter() == g2.Counter() {
-			return 1 // Same GUID counter, not the same realm ID
-		}
-	}
-
-	return 0
 }
 
 func (g GUID) SetRealmID(realmID uint64) GUID {

@@ -90,8 +90,7 @@ func extractCreatures() {
 		panic(err)
 	}
 
-	cfl := openFile("DB/CreatureTemplate.txt")
-	wr := openTextWriter(cfl)
+	wr := openTextFile("DB/CreatureTemplate.txt")
 	for _, cr := range ctt {
 		ct := models.CreatureTemplate{
 			ID:                  fmt.Sprintf("cr:%d", cr.Entry),
@@ -336,5 +335,5 @@ func extractCreatures() {
 		}
 	}
 
-	cfl.Close()
+	wr.close()
 }

@@ -9,7 +9,7 @@ import (
 
 // Since documentation is often lacking or contradictory, a definition of terms:
 // Map: a continuum of world geometry data. A 2 dimensional model storing data. Typically consisting of 64x64 blocks. (in the future, with modded clients, we hope to be able to push this to an even greater size)
-// Block: 16x16 list within a Map.
+// Block: 16x16 list within a Map. Confusingly, some (Noggit and others) would also refer to this as a "tile".
 // Chunks: The little bits of map geometry that comprise a Block
 
 const (
@@ -34,6 +34,10 @@ var (
 )
 
 // Using map parameters, calculate what the block index of a position is. Will error if pos is out of bounds.
+//
+//		index, _ := terrain.CalcBlockIndex(&terrain.DefaultMap, tempest.C2Vector{
+//				X:
+//	})
 func CalcBlockIndex(m *MapParam, pos tempest.C2Vector) (bi BlockIndex, err error) {
 	var (
 		// Suppose BlockSizes are 64 (standard)
@@ -65,58 +69,65 @@ func CalcBlockIndex(m *MapParam, pos tempest.C2Vector) (bi BlockIndex, err error
 		return
 	}
 
-	// Offset the position to get its absolute value
-	// now, rangePos.X is now between 0 and mapWidth
-	rangePos := tempest.C2Vector{
-		X: pos.X + max.X,
-		Y: pos.Y + max.Y,
+	blockZeroPoint := tempest.C2Vector{
+		// 64 / 2 = 32
+		X: float32(m.BlockSize.X) / 2,
+		Y: float32(m.BlockSize.Y) / 2,
 	}
 
-	widthFraction := rangePos.X / mapWidth
-	lengthFraction := rangePos.Y / mapLength
+	xBlock := math32.Floor(blockZeroPoint.X - (pos.X / BlockSize))
+	yBlock := math32.Floor(blockZeroPoint.Y - (pos.Y / BlockSize))
 
-	bi.X = int32(widthFraction * float32(m.BlockSize.X))
-	bi.Y = int32(lengthFraction * float32(m.BlockSize.Y))
+	bi.X = int32(xBlock)
+	bi.Y = int32(yBlock)
+
+	// // Client coordinats
+	// // now, rangePos.X is now between 0 and mapWidth
+	// clientCoordinates := tempest.C2Vector{
+	// 	X: pos.X + max.X,
+	// 	Y: pos.Y + max.Y,
+	// }
+
+	// widthFraction := rangePos.X / mapWidth
+	// lengthFraction := rangePos.Y / mapLength
+
+	// bi.X = int32(widthFraction * float32(m.BlockSize.X))
+	// bi.Y = int32(lengthFraction * float32(m.BlockSize.Y))
 
 	return
 }
 
+// TODO: invalid fix
 // Using a BlockIndex, return the in-world XY position of the corner of this.
 // Note that this does not return the CENTER of the block, only the lowest corner. For instance, 32,32 -> 0,0
 func CalcBlockCornerPos(m *MapParam, bi BlockIndex) (pos tempest.C2Vector, err error) {
-	if bi.X > m.BlockSize.X {
-		err = fmt.Errorf("terrain: CalcBlockCornerPos: X value %d is over maximum %d", bi.X, m.BlockSize.X)
+	if bi.X < 0 || bi.X >= m.BlockSize.X {
+		err = fmt.Errorf("terrain: CalcBlockCornerPos: X value %d out of bounds 0-%d", bi.X, m.BlockSize.X)
 		return
 	}
 
-	if bi.Y > m.BlockSize.Y {
-		err = fmt.Errorf("terrain: CalcBlockCornerPos: Y value %d is over maximum %d", bi.Y, m.BlockSize.Y)
+	if bi.Y < 0 || bi.Y >= m.BlockSize.Y {
+		err = fmt.Errorf("terrain: CalcBlockCornerPos: Y value %d out of bounds 0-%d", bi.Y, m.BlockSize.Y)
 		return
 	}
 
 	var (
+		// 64 * 533.33333 = 34133.33312
 		mapWidth  = float32(m.BlockSize.X) * BlockSize
 		mapLength = float32(m.BlockSize.Y) * BlockSize
 	)
-	// quick maffs
 
 	relativeOffset := tempest.C2Vector{
+		// 34133.33312 / 2 = 17066.66656
 		X: mapWidth / 2,
 		Y: mapLength / 2,
 	}
 
-	absolutePos := tempest.C2Vector{
-		X: (float32(bi.X) / float32(m.BlockSize.X)) * mapWidth,
-		Y: (float32(bi.Y) / float32(m.BlockSize.Y)) * mapLength,
+	pos = tempest.C2Vector{
+		X: relativeOffset.X - (float32(bi.X) * BlockSize),
+		Y: relativeOffset.Y - (float32(bi.Y) * BlockSize),
 	}
 
-	// i.e. the in-world coordinates
-	relativePos := tempest.C2Vector{
-		X: absolutePos.X - relativeOffset.X,
-		Y: absolutePos.Y - relativeOffset.Y,
-	}
-
-	pos = relativePos
 	return
 }
 
@@ -128,18 +139,18 @@ func CalcChunkIndex(m *MapParam, pos tempest.C2Vector) (ci ChunkIndex, err error
 		mapLength = float32(m.BlockSize.Y) * BlockSize
 	)
 
-	abs := tempest.C2Vector{
+	clientCoordinates := tempest.C2Vector{
 		X: pos.X + (mapWidth / 2),
 		Y: pos.Y + (mapLength / 2),
 	}
 
-	blockPos := tempest.C2Vector{
-		X: math32.Mod(abs.X, BlockSize),
-		Y: math32.Mod(abs.Y, BlockSize),
+	blockRelPos := tempest.C2Vector{
+		X: math32.Mod(clientCoordinates.X, BlockSize),
+		Y: math32.Mod(clientCoordinates.Y, BlockSize),
 	}
 
-	widthFraction := blockPos.X / BlockSize
-	lengthFraction := blockPos.Y / BlockSize
+	widthFraction := blockRelPos.X / BlockSize
+	lengthFraction := blockRelPos.Y / BlockSize
 
 	ci.X = int32(widthFraction * 16)
 	ci.Y = int32(lengthFraction * 16)

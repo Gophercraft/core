@@ -6,7 +6,6 @@ import (
 
 	"github.com/Gophercraft/core/i18n"
 	"github.com/Gophercraft/core/realm/wdb/models"
-	"github.com/Gophercraft/text"
 )
 
 type NPCText struct {
@@ -130,9 +129,7 @@ func (nt NPCText) GetOption(idx int) models.NPCTextOption {
 }
 
 func extractNPCText() {
-	fl := openFile("DB/NPCText.txt")
-	wr := text.NewEncoder(fl)
-
+	wr := openTextFile("DB/NPCText.txt")
 	var npcText []NPCText
 
 	err := DB.Find(&npcText)
@@ -157,5 +154,5 @@ func extractNPCText() {
 		}
 	}
 
-	fl.Close()
+	wr.close()
 }

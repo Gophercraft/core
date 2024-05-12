@@ -24,10 +24,8 @@ func extractPlayerCreateItems() {
 		panic(err)
 	}
 
-	fl := openFile("DB/PlayerCreateItem.txt")
-	printTimestamp(fl)
+	wr := openTextFile("DB/PlayerCreateItem.txt")
 
-	wr := openTextWriter(fl)
 	for _, pci := range pcis {
 		var item models.PlayerCreateItem
 		item.Equip = models.EquipInventory
@@ -41,5 +39,5 @@ func extractPlayerCreateItems() {
 		}
 	}
 
-	fl.Close()
+	wr.close()
 }

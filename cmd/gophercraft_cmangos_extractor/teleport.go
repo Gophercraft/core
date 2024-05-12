@@ -36,9 +36,7 @@ func extractGameTeleports() {
 		panic(err)
 	}
 
-	fl := openFile("DB/PortLocation.txt")
-	printTimestamp(fl)
-	wr := openTextWriter(fl)
+	wr := openTextFile("DB/PortLocation.txt")
 
 	for _, pl := range gt {
 		if err := wr.Encode(models.PortLocation{
@@ -55,5 +53,5 @@ func extractGameTeleports() {
 		}
 	}
 
-	fl.Close()
+	wr.close()
 }

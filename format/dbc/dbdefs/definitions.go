@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"compress/zlib"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"strings"
 
 	"github.com/Gophercraft/core/format/dbc/dbd"
@@ -23,7 +23,7 @@ func init() {
 		panic(err)
 	}
 
-	b, err := ioutil.ReadAll(zr)
+	b, err := io.ReadAll(zr)
 	if err != nil {
 		panic(err)
 	}

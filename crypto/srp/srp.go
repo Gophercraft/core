@@ -6,27 +6,23 @@ package srp
 
 import (
 	"bytes"
+	"crypto/sha1"
 	"strings"
 
-	"github.com/Gophercraft/core/crypto"
+	"github.com/Gophercraft/core/crypto/hashutil"
 )
 
 var (
-	Generator  = BigNumFromInt(7)
-	Multiplier = BigNumFromInt(3)
-	Prime      = NewBigNumFromHex("894B645E89E1535BBDAD5B8B290650530801B18EBFBF5E8FAB3C82872A3E9BB7")
+	Zero       = NewInt(0)
+	Generator  = NewInt(7)
+	Multiplier = NewInt(3)
+	Prime      = NewIntFromString("62100066509156017342069496140902949863249758336000796928566441170293728648119")
 )
 
-func Credentials(username, password string) []byte {
-	I := strings.ToUpper(username)
-	P := strings.ToUpper(password)
-	return []byte(I + ":" + P)
-}
-
-// Ngh = XOR(H(N), H(g))
-func HashPrimeAndGenerator(N, g *BigNum) []byte {
-	Nh := crypto.SHA1(N.ToArray())
-	gh := crypto.SHA1(g.ToArray())
+// Ngh = XOR[20](H(N), H(g))
+func HashPrimeAndGenerator(N, g *Int) []byte {
+	Nh := hashutil.H(sha1.New, N.Bytes())
+	gh := hashutil.H(sha1.New, g.Bytes())
 
 	Ngh := make([]byte, 20)
 	for i := 0; i < 20; i++ {
@@ -36,53 +32,35 @@ func HashPrimeAndGenerator(N, g *BigNum) []byte {
 	return Ngh
 }
 
-// Compute auth := H('username' + ':' + 'pass')
-// g := 7
-// ....
-// x := H(salt, auth)
-// v := (g^x) % N
-//
-func CalculateVerifier(auth []byte, g, N, salt *BigNum) (x *BigNum, v *BigNum) {
-	x = BigNumFromArray(crypto.SHA1(salt.ToArray(), auth))
-	v = g.ModExp(x, N)
-	return x, v
-}
-
-func ServerGenerateEphemeralValues(g, N, v *BigNum) (b *BigNum, B *BigNum) {
-	b = BigNumFromRand(19)
+func ServerGenerateEphemeralValues(g, N, v *Int) (b *Int, B *Int) {
+	b = NewRandomInt(19)
 	gMod := g.ModExp(b, N)
 	B = ((v.Multiply(Multiplier.Copy())).Add(gMod)).Mod(N)
 	return
 }
 
-func SRPCalculate(username, password string, _B, n, salt []byte) (*BigNum, []byte, []byte, []byte) {
-	auth := HashCredentials(username, password)
-	return HashCalculate(username, auth, _B, n, salt)
-}
-
-func HashCalculate(username string, auth, _B, _N, salt []byte) (*BigNum, []byte, []byte, []byte) {
-	g := Generator.Copy()
+func HashCalculate(username string, identity_hash, server_public_key, large_safe_prime, generator, salt []byte) (verifier *Int, session_key []byte, public_key []byte, proof []byte) {
+	g := NewIntFromBytes(generator)
 
 	k := Multiplier.Copy()
 
-	N := BigNumFromArray(_N)
-	s := BigNumFromArray(salt)
+	N := NewIntFromBytes(large_safe_prime)
 
-	x, v := CalculateVerifier(auth, g, N, s)
+	x, v := CalculateVerifier(sha1.New, salt, identity_hash, g, N)
 
-	a := BigNumFromRand(19)
+	a := NewRandomInt(19)
 	A := g.ModExp(a, N)
 
-	B := BigNumFromArray(_B)
+	B := NewIntFromBytes(server_public_key)
 
-	uh := crypto.SHA1(A.ToArray(), B.ToArray())
-	u := BigNumFromArray(uh)
+	uh := hashutil.H(sha1.New, A.Bytes(), B.Bytes())
+	u := NewIntFromBytes(uh)
 
 	kgx := k.Multiply(g.ModExp(x, N))
 	aux := a.Add(u.Multiply(x))
 
 	_S := B.Subtract(kgx).ModExp(aux, N)
-	S := _S.ToArray()
+	S := _S.Bytes()
 
 	if len(S) > 32 {
 		S = S[:32]
@@ -97,8 +75,8 @@ func HashCalculate(username string, auth, _B, _N, salt []byte) (*BigNum, []byte,
 		S2[i] = S[i*2+1]
 	}
 
-	S1h := crypto.SHA1(S1)
-	S2h := crypto.SHA1(S2)
+	S1h := hashutil.H(sha1.New, S1)
+	S2h := hashutil.H(sha1.New, S2)
 
 	K := make([]byte, 40)
 
@@ -107,37 +85,33 @@ func HashCalculate(username string, auth, _B, _N, salt []byte) (*BigNum, []byte,
 		K[i*2+1] = S2h[i]
 	}
 
-	userh := crypto.SHA1([]byte(strings.ToUpper(username)))
+	userh := hashutil.H(sha1.New, []byte(strings.ToUpper(username)))
 
 	Ngh := HashPrimeAndGenerator(N, g)
 
-	M1 := crypto.SHA1(
+	M1 := hashutil.H(sha1.New,
 		Ngh,
 		userh,
-		s.ToArray(),
-		A.ToArray(),
-		B.ToArray(),
+		salt,
+		A.Bytes(),
+		B.Bytes(),
 		K,
 	)
 
-	return v, K, A.ToArray(), M1
+	return v, K, A.Bytes(), M1
 }
 
-func HashCredentials(username, password string) []byte {
-	return crypto.SHA1(Credentials(username, password))
-}
-
-func ServerLogonProof(username string, A, M1, b, B, s, N, v *BigNum) ([]byte, bool, []byte) {
+func ServerLogonProof(username string, A, M1, b, B, s, N, v *Int) ([]byte, bool, []byte) {
 	g := Generator.Copy()
 
-	u := BigNumFromArray(crypto.SHA1(A.ToArray(), B.ToArray()))
-	if A.Mod(N).Equals(BigNumFromInt(0)) {
+	u := NewIntFromBytes(hashutil.H(sha1.New, A.Bytes(), B.Bytes()))
+	if A.Mod(N).Equals(Zero) {
 		return nil, false, nil
 	}
 
 	_S := (A.Multiply(v.ModExp(u, N))).ModExp(b, N)
 
-	S := _S.ToArray()
+	S := _S.Bytes()
 
 	S1, S2 := make([]byte, 16), make([]byte, 16)
 
@@ -149,8 +123,8 @@ func ServerLogonProof(username string, A, M1, b, B, s, N, v *BigNum) ([]byte, bo
 		S2[i] = S[i*2+1]
 	}
 
-	S1h := crypto.SHA1(S1)
-	S2h := crypto.SHA1(S2)
+	S1h := hashutil.H(sha1.New, S1)
+	S2h := hashutil.H(sha1.New, S2)
 
 	vK := make([]byte, 40)
 
@@ -159,27 +133,27 @@ func ServerLogonProof(username string, A, M1, b, B, s, N, v *BigNum) ([]byte, bo
 		vK[i*2+1] = S2h[i]
 	}
 
-	K := BigNumFromArray(vK)
+	K := NewIntFromBytes(vK)
 
-	Nh := crypto.SHA1(N.ToArray())
-	gh := crypto.SHA1(g.ToArray())
+	Nh := hashutil.H(sha1.New, N.Bytes())
+	gh := hashutil.H(sha1.New, g.Bytes())
 
 	for i := 0; i < 20; i++ {
 		Nh[i] ^= gh[i]
 	}
 
-	t3 := BigNumFromArray(Nh)
-	t4 := crypto.SHA1([]byte(strings.ToUpper(username)))
+	t3 := NewIntFromBytes(Nh)
+	t4 := hashutil.H(sha1.New, []byte(strings.ToUpper(username)))
 
-	final := crypto.SHA1(
-		t3.ToArray(),
+	final := hashutil.H(sha1.New,
+		t3.Bytes(),
 		t4,
-		s.ToArray(),
-		A.ToArray(),
-		B.ToArray(),
-		K.ToArray(),
+		s.Bytes(),
+		A.Bytes(),
+		B.Bytes(),
+		K.Bytes(),
 	)
 
-	M2 := crypto.SHA1(A.ToArray(), final, K.ToArray())
-	return vK, bytes.Equal(final, M1.ToArray()), M2
+	M2 := hashutil.H(sha1.New, A.Bytes(), final, K.Bytes())
+	return vK, bytes.Equal(final, M1.Bytes()), M2
 }

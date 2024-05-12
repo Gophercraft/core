@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Gophercraft/core/vsn"
+	"github.com/Gophercraft/core/version"
 )
 
 type TypeMask uint32
@@ -30,8 +30,8 @@ const (
 type TypeMaskDescriptor map[TypeMask]uint32
 
 var (
-	TypeMaskDescriptors = map[vsn.Build]TypeMaskDescriptor{
-		vsn.Alpha: {
+	TypeMaskDescriptors = map[version.Build]TypeMaskDescriptor{
+		version.Alpha: {
 			TypeMaskObject:        0x0001,
 			TypeMaskItem:          0x0002,
 			TypeMaskContainer:     0x0004,
@@ -45,12 +45,12 @@ var (
 )
 
 func init() {
-	TypeMaskDescriptors[vsn.V1_12_1] = TypeMaskDescriptors[vsn.Alpha]
-	TypeMaskDescriptors[vsn.V2_4_3] = TypeMaskDescriptors[vsn.Alpha]
-	TypeMaskDescriptors[vsn.V3_3_5a] = TypeMaskDescriptors[vsn.Alpha]
+	TypeMaskDescriptors[version.V1_12_1] = TypeMaskDescriptors[version.Alpha]
+	TypeMaskDescriptors[version.V2_4_3] = TypeMaskDescriptors[version.Alpha]
+	TypeMaskDescriptors[version.V3_3_5a] = TypeMaskDescriptors[version.Alpha]
 }
 
-func ResolveTypeMask(version vsn.Build, unresolvedTypeMask uint32) (TypeMask, error) {
+func ResolveTypeMask(version version.Build, unresolvedTypeMask uint32) (TypeMask, error) {
 	td, ok := TypeMaskDescriptors[version]
 	if !ok {
 		return 0, fmt.Errorf("guid: invalid version code %d", version)
@@ -67,7 +67,7 @@ func ResolveTypeMask(version vsn.Build, unresolvedTypeMask uint32) (TypeMask, er
 	return out, nil
 }
 
-func (t TypeMask) Resolve(version vsn.Build) (uint32, error) {
+func (t TypeMask) Resolve(version version.Build) (uint32, error) {
 	td, ok := TypeMaskDescriptors[version]
 	if !ok {
 		return 0, fmt.Errorf("guid: invalid version code %d", version)

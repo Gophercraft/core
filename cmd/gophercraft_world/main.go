@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/Gophercraft/core/realm/worldserver"
+	"github.com/Gophercraft/core/app/world"
 	// _ "your/plugin/here"
 )
 
 func main() {
-	worldserver.Run()
+	world.Run()
 }

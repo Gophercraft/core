@@ -1,57 +1,39 @@
-![gopher](gopher.png)
+![gopher](./docs/img/gopher.png)
 
-# Gophercraft
+# Gophercraft/core
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/Gophercraft/core.svg)](https://pkg.go.dev/github.com/Gophercraft/core)
+[![Version](https://img.shields.io/badge/version-0.7.1-blue)]()
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Chat on discord](https://img.shields.io/discord/556039662997733391.svg)](https://discord.gg/xPtuEjt)
 
 The Gophercraft project provides 100% Go libraries and programs for research and experimentation with MMORPG software.
 
-**⚠️ WARNING: Gophercraft is experimental and prone to all sorts of game-ruining exploits. Don't use it yet for anything serious yet.**
+# Getting started
 
-Read [here](https://github.com/Gophercraft/core/wiki) for more information 
+- [Build Gophercraft core from source](./docs/INSTALL.md)
 
-## Server setup/installation (Linux)
+- [Set up a Gophercraft network](./docs/SETUP.md)
 
-```bash
-# Install packages
-sudo apt install git golang mariadb-server
+- [Command line reference](./docs/WIZARD.md)
 
-git clone https://github.com/Gophercraft/core gophercraft; cd gophercraft
+# Architecture
 
-# Install Gophercraft Core
-go install github.com/Gophercraft/core/cmd/gophercraft_wiz
-go install github.com/Gophercraft/core/cmd/gophercraft_home
-go install github.com/Gophercraft/core/cmd/gophercraft_world
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./docs/img/network-diagram-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="./docs/img/network-diagram-light.svg">
+  <img alt="network diagram">
+</picture>
 
-# Generate configuration files and create databases with the Gophercraft Wizard
-gophercraft_wiz
+# Versions
 
-# You can edit your configurations in ~/.local/Gophercraft/Home/Home.txt
-# and in ~/.local/Gophercraft/<worldserver folder>/World.txt
-gophercraft_home
+Gophercraft follows an All-In-One ideology (similar to AIO-Sandbox and WowPacketParser), meaning that all of its packages attempt when possible to be interoperable with many different game versions at once.
 
-# in a different command prompt
-# launch worldserver
-gophercraft_world <Name of server>
-```
+Supported versions include:
 
-## home server
+- 0.5.3.3368 (Alpha)
+- 1.12.1.5875 (Vanilla)
+- 2.4.3.8606 (TBC)
+- 3.3.5a.12340 (WoTLK)
 
-The center of a Gophercraft network is the Home server.
-
-The home server acts as a central authority in a Gophercraft network, similar to the MaNGOS "realmd". 
-
-Upon creating new World config, an ECDSA keypair is generated. The Home server associates this public key with a new Realm ID.
-
-Now, the world server can post its info back to Home, and that will update the realm list. Hooray!
-
-> Tip: Set OpenRegistration to true in your `Home.txt` if you wish to allow anybody to register a world server. 
-
-## world server (or realm server)
-
-The world server contains the in-game experience. Players connect to it with the IP address posted by the registered world server.
-
-It aims to be highly extensible through the use of datapacks and Go plugins.
-
+Support for modern protocols and formats is not yet ready, but remains in active development.

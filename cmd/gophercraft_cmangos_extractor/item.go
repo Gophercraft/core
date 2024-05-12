@@ -10,6 +10,10 @@ import (
 	"github.com/superp00t/etc"
 )
 
+var (
+	allItems = map[string]*models.ItemTemplate{}
+)
+
 type ItemTemplate struct {
 	Entry                     int    `xorm:"'entry'"`
 	Class                     uint32 `xorm:"'class'"`
@@ -223,11 +227,7 @@ func extractItems() {
 		panic(err)
 	}
 
-	fl := openFile("DB/ItemTemplate.txt")
-
-	printTimestamp(fl)
-
-	wr := openTextWriter(fl)
+	wr := openTextFile("DB/ItemTemplate.txt")
 
 	for _, t := range itt {
 		var stats []models.ItemStat
@@ -266,7 +266,7 @@ func extractItems() {
 			}
 		}
 
-		witem := models.ItemTemplate{
+		witem := &models.ItemTemplate{
 			ID:                        fmt.Sprintf("it:%d", t.Entry),
 			Class:                     t.Class,
 			Subclass:                  t.Subclass,
@@ -275,11 +275,11 @@ func extractItems() {
 			Quality:                   models.ItemQuality(t.Quality),
 			Flags:                     flags,
 			BuyCount:                  t.BuyCount,
-			BuyPrice:                  t.BuyPrice,
-			SellPrice:                 t.SellPrice,
-			InventoryType:             t.InventoryType,
-			AllowableClass:            t.AllowableClass,
-			AllowableRace:             t.AllowableRace,
+			BuyPrice:                  models.Money(t.BuyPrice),
+			SellPrice:                 models.Money(t.SellPrice),
+			InventoryType:             models.InventoryType(t.InventoryType),
+			AllowableClass:            models.ClassMask(t.AllowableClass),
+			AllowableRace:             models.RaceMask(t.AllowableRace),
 			ItemLevel:                 t.ItemLevel,
 			RequiredLevel:             t.RequiredLevel,
 			RequiredSkill:             t.RequiredSkill,
@@ -331,9 +331,10 @@ func extractItems() {
 		if err := wr.Encode(witem); err != nil {
 			panic(err)
 		}
+		allItems[witem.ID] = witem
 	}
 
-	fl.Close()
+	wr.close()
 
 	itt = nil
 }

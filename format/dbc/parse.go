@@ -210,7 +210,7 @@ func (t *Table) parseSingleField(gCol *dbd.ColumnDefinition, lCol *dbd.LayoutCol
 				return reflect.Value{}, nil, err
 			}
 			if langstring != "" {
-				text[i18n.Locale(i)] = langstring
+				text[i18n.ID(i).Locale()] = langstring
 			}
 		}
 	default:

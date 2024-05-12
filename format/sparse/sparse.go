@@ -10,7 +10,7 @@ func Decompress(input []byte) ([]byte, error) {
 	src.ReadUint32()
 
 	for src.Available() > 0 {
-		next := src.ReadByte()
+		next := src.ReadUint8()
 
 		if next&0x80 != 0 {
 			chunkSize := (next & 0x7F) + 1
@@ -19,7 +19,7 @@ func Decompress(input []byte) ([]byte, error) {
 		} else {
 			chunkSize := (next & 0x7f) + 3
 			for x := uint8(0); x < chunkSize; x++ {
-				outputStream.WriteByte(0)
+				outputStream.WriteUint8(0)
 			}
 		}
 	}

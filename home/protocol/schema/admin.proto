@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package admin;
+
+option go_package = "github.com/Gophercraft/core/home/protocol/pb/admin";
+
+import "google/protobuf/timestamp.proto";
+import "auth.proto";
+
+message AccountRequest {
+  string credential = 1;
+  uint64 id = 2;
+}
+
+message SuspendAccountRequest {
+  string credential = 1;
+  uint64 id = 2;
+  int64 suspension_duration = 3;
+}
+
+message BanStatus {
+  uint64 id = 1;
+  bool banned = 2;
+  bool suspended = 3;
+  google.protobuf.Timestamp unsuspend_time = 4;
+}
+
+message LockStatus {
+  bool locked = 1;
+}
+
+service AdminService {
+  rpc BanAccount(AccountRequest) returns (BanStatus) {}
+  rpc UnbanAccount(AccountRequest) returns (BanStatus) {}
+  rpc SuspendAccount(SuspendAccountRequest) returns (BanStatus) {}
+  rpc UnsuspendAccount(AccountRequest) returns (BanStatus) {}
+  rpc LockAccount(AccountRequest) returns (LockStatus) {}
+  rpc UnlockAccount(AccountRequest) returns (LockStatus) {}
+
+  rpc BanGameAccount(AccountRequest) returns (BanStatus) {}
+  rpc UnbanGameAccount(AccountRequest) returns (BanStatus) {}
+  rpc SuspendGameAccount(SuspendAccountRequest) returns (BanStatus) {}
+  rpc UnsuspendGameAccount(AccountRequest) returns (BanStatus) {}
+}

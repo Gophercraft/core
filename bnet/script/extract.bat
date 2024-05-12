@@ -1,0 +1,1 @@
+protoss "E:\bobbykotick\World of Warcraft\_retail_\Wow.exe" -o .\bnet\proto\ --go_prefix "github.com/Gophercraft/core/bnet/pb"

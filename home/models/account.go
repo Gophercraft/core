@@ -1,31 +1,57 @@
 package models
 
 import (
-	"github.com/Gophercraft/core/home/rpcnet"
-	"github.com/Gophercraft/core/i18n"
+	"time"
+
+	"github.com/Gophercraft/core/home/protocol/pb/auth"
 )
 
 // Account represents the authentication account
 // This account tracks what privileges you are allowed, and what your password is.
 type Account struct {
-	ID       uint64      `xorm:"'id' pk autoincr"`
-	Tier     rpcnet.Tier `xorm:"'tier'"`
-	Locale   i18n.Locale `xorm:"'locale'"`
-	Platform string      `xorm:"'platform'"`
-	Username string      `xorm:"'username'"`
-	// SRP Identity hash
-	IdentityHash []byte `xorm:"'identity_hash'"`
-	// Bcrypt hash - should be used when SRP IdentityHash is not required
-	WebLoginHash []byte `xorm:"'web_login_hash'"`
-	Locked       bool   `xorm:"'locked'"`
-}
+	ID        uint64 `database:"1:auto_increment,index,exclusive"`
+	Tier      auth.AccountTier
+	CreatedAt time.Time
+	// Login temporarily disabled. Triggered by security threats. May require email verification to continue
+	Locked bool
+	// Permanently banned. Cannot log in through the web app.
+	Banned bool
+	// Temporarily suspended, account access is restored at UnsuspendAt
+	Suspended bool
+	// Determines if the email has been validated
+	EmailVerified bool
+	// Determines if TOTP is enabled for this account
+	Authenticator bool
+	// Marks the time
+	EmailVerificationCode       string
+	EmailVerificationCodeSentAt time.Time
+	// When the suspension is going to be lifted
+	UnsuspendAt time.Time
+	// Language string
+	Locale string
+	// Grunt tag only (Win/Mac)
+	OS string
+	// Grunt tag only (x86/x64)
+	Architecture string
+	// BNet short string (Wn64, Mc64)
+	Platform string
+	// Account email address (may or may not be valid)
+	Email    string
+	Username string
 
-// GameAccount represents the the game data account.
-// GameAccounts track what character lists are tied to your account.
-// (Legacy servers) By changing your account to Active, you can select a different character list upon logging in
-type GameAccount struct {
-	ID     uint64 `xorm:"'id' pk autoincr"`
-	Name   string `xorm:"'name'"`
-	Active bool   `xorm:"'active'"`
-	Owner  uint64 `xorm:"'owner'"`
+	AuthenticatorSecret []byte
+	// TODO: disable the generation of this field when user does not wish to provide Grunt compatiblity
+	// Grunt Identity hash SHA1(TOUPPER(user) : TOUPPER(password))
+	Identity_SHA_1 []byte
+	// Same as Grunt but with SHA256 instead of SHA1, used for BNet REST login
+	Identity_SHA_256        []byte
+	Identity_SHA_512        []byte
+	Identity_PBKDF2_SHA_512 []byte
+	Identity_PBKDF2_Salt    []byte
+
+	// Bcrypt hash - should be used when SRP IdentityHash is not required
+	// Used for the Web API and wherever else credentials are transmitted in plaintext:
+	Identity_Bcrypt []byte
+	// Session Key
+	SessionKey []byte
 }

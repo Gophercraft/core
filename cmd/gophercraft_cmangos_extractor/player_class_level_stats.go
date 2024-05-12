@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/Gophercraft/core/realm/wdb/models"
-	"github.com/Gophercraft/text"
 )
 
 // Base stats that apply to all members of a class.
@@ -34,9 +33,7 @@ func (PlayerLevelStats) TableName() string {
 }
 
 func extractPlayerClassLevelStats() {
-	fl := openFile("DB/ClassLevelStats.txt")
-	printTimestamp(fl)
-	wr := text.NewEncoder(fl)
+	wr := openTextFile("DB/ClassLevelStats.txt")
 
 	var pcls []PlayerClassLevelStats
 	if err := DB.Find(&pcls); err != nil {
@@ -57,13 +54,11 @@ func extractPlayerClassLevelStats() {
 		wr.Encode(&pstats)
 	}
 
-	fl.Close()
+	wr.close()
 }
 
 func extractPlayerLevelStats() {
-	fl := openFile("DB/RaceClassLevelStats.txt")
-	printTimestamp(fl)
-	wr := text.NewEncoder(fl)
+	wr := openTextFile("DB/RaceClassLevelStats.txt")
 
 	var pcls []PlayerLevelStats
 	if err := DB.Find(&pcls); err != nil {
@@ -87,5 +82,5 @@ func extractPlayerLevelStats() {
 		wr.Encode(&pstats)
 	}
 
-	fl.Close()
+	wr.close()
 }

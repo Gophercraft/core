@@ -1,7 +1,6 @@
 package wizard
 
 import (
-	"bytes"
 	"fmt"
 	"path/filepath"
 	"reflect"
@@ -9,7 +8,7 @@ import (
 	"github.com/Gophercraft/core/datapack"
 	"github.com/Gophercraft/core/format/dbc"
 	"github.com/Gophercraft/core/format/dbc/dbdefs"
-	"github.com/Gophercraft/core/vsn"
+	"github.com/Gophercraft/core/version"
 	"github.com/Gophercraft/log"
 	"github.com/Gophercraft/text"
 )
@@ -28,11 +27,13 @@ func (ex *Extractor) neededDBs() []ExDb {
 	need = []ExDb{
 		{"AreaTable", reflect.TypeOf(dbdefs.Ent_AreaTable{})},
 		{"AreaTrigger", reflect.TypeOf(dbdefs.Ent_AreaTrigger{})},
+		{"CharBaseInfo", reflect.TypeOf(dbdefs.Ent_CharBaseInfo{})},
 		{"ChrRaces", reflect.TypeOf(dbdefs.Ent_ChrRaces{})},
 		{"ChrClasses", reflect.TypeOf(dbdefs.Ent_ChrClasses{})},
 		{"CharStartOutfit", reflect.TypeOf(dbdefs.Ent_CharStartOutfit{})},
 		{"CreatureFamily", reflect.TypeOf(dbdefs.Ent_CreatureFamily{})},
 		{"EmotesText", reflect.TypeOf(dbdefs.Ent_EmotesText{})},
+		{"ItemClass", reflect.TypeOf(dbdefs.Ent_ItemClass{})},
 		{"Map", reflect.TypeOf(dbdefs.Ent_Map{})},
 		{"Spell", reflect.TypeOf(dbdefs.Ent_Spell{})},
 		{"SpellCastTimes", reflect.TypeOf(dbdefs.Ent_SpellCastTimes{})},
@@ -50,14 +51,15 @@ func (ex *Extractor) ExtractDatabases() error {
 		ex.removePack(DBPackName)
 	}
 
-	exAuthor := fmt.Sprintf("Gophercraft Wizard %s", vsn.GophercraftVersion)
+	exAuthor := fmt.Sprintf("Gophercraft Wizard %s", version.GophercraftVersion)
 
 	pack, err := ex.AuthorPack(tempPackDir, datapack.PackConfig{
-		Name:        "Gophercraft Base Databases",
-		Author:      exAuthor,
-		Description: "The base databases required by Gophercraft Core " + ex.generationNotice(),
-		Version:     "1.0",
-		Depends:     ex.dependencies(),
+		Name:           "Gophercraft Base Databases",
+		Author:         exAuthor,
+		Description:    "The base databases required by Gophercraft Core " + ex.generationNotice(),
+		PackVersion:    "1.0",
+		MinCoreVersion: version.GophercraftVersion.String(),
+		Depends:        ex.dependencies(),
 	})
 
 	if err != nil {
@@ -93,13 +95,13 @@ func (ex *Extractor) extractDB(pack *datapack.Pack, exDB *ExDb) error {
 
 	path := prefix + exDB.Name + suffix
 
-	data, err := ex.Source.ReadFile(path)
+	dbfile, err := ex.Source.Open(path)
 	if err != nil {
 		return err
 	}
 
 	db := dbc.NewDB(ex.Source.Build())
-	table, err := db.Open(exDB.Name, bytes.NewReader(data))
+	table, err := db.Open(exDB.Name, dbfile)
 	if err != nil {
 		return err
 	}

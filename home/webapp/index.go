@@ -2,41 +2,19 @@ package webapp
 
 import (
 	"embed"
-	"io"
 	"io/fs"
+	"log"
 )
 
 // assets hold our web assets
 //
-//go:embed assets/*
-var assets embed.FS
-var Assets fs.FS
+//go:embed public/*
+var webapp_public embed.FS
 
-// templates holds our templates
-//
-//go:embed template/*
-var templates embed.FS
-var Templates fs.FS
-
-func init() {
-	var err error
-	Templates, err = fs.Sub(templates, "template")
+func FileServer() fs.FS {
+	filesystem, err := fs.Sub(webapp_public, "public")
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
-
-	Assets, err = fs.Sub(assets, "assets")
-	if err != nil {
-		panic(err)
-	}
-}
-
-func ReadEmbedded(filesys fs.FS, path string) ([]byte, error) {
-	f, err := filesys.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	data, err := io.ReadAll(f)
-	f.Close()
-	return data, err
+	return filesystem
 }

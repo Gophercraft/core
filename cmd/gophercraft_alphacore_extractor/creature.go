@@ -336,5 +336,5 @@ func extractCreatures() {
 		}
 	}
 
-	cfl.Close()
+	wr.close()
 }

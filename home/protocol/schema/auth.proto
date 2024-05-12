@@ -1,0 +1,148 @@
+syntax = "proto3";
+
+package auth;
+
+option go_package = "github.com/Gophercraft/core/home/protocol/pb/auth";
+
+// Listing of account tiers. Tiers map into a permission list, which detail what actions a tier may/may not take.
+enum AccountTier {
+	// Actions anyone can take
+	NORMAL = 0;
+	// Actions restricted to accounts trusted by the network
+	PRIVILEGED = 1;
+	// Severe game-altering actions that can disrupt the server experience
+	GAME_MASTER = 2;
+	// Game ruining actions taken to punish/mute/ban accounts
+	MODERATOR = 3;
+	// Severe network-changing actions (server stop/start)
+	ADMIN = 4;
+}
+
+// Listing various 2-factor authentication methods
+enum TwoFactorAuthenticationMethod {
+	NONE = 0;
+	// 2FA codes will be sent to the account's verified email address.
+	EMAIL = 1;
+	// 2FA codes will be agreed upon with a time-based password
+	TOTP = 2;
+}
+
+// Describes the status of a WebToken
+enum WebTokenStatus {
+	// The WebToken has expired or been logged out manually
+	LOGGED_OUT = 0;
+	// Two factor authentication is needed
+	AUTH_NEEDED = 1;
+	// No other action required; token is already authenticated
+	AUTHENTICATED = 2;
+}
+
+message LoginRequest {
+	string account_name = 1;
+	string password = 2;
+}
+
+message CredentialStatusRequest {
+	string credential = 1;
+}
+
+message CredentialStatus {
+	// The status of the WebToken
+	WebTokenStatus web_token_status = 1;
+	TwoFactorAuthenticationMethod two_factor_authentication_method = 2;
+	uint64 account_id = 3;
+}
+
+message LoginResponse {
+	// the new token
+	string web_token = 1;
+}
+
+message LogoutRequest {
+	string credential = 1;
+}
+
+message LogoutResponse {
+	bool logged_out = 1;
+}
+
+message SendEmailAuthenticationCodeRequest {
+	string credential = 1;
+}
+
+message SendEmailAuthenticationCodeResponse {
+	bool sent = 1;
+}
+
+message TwoFactorAuthenticationMethodsRequest {
+	string credential = 1;
+}
+
+message TwoFactorAuthenticationMethodsResponse {
+	repeated TwoFactorAuthenticationMethod methods = 1;
+}
+
+message CredentialAuthenticationRequest {
+	string credential = 1;
+	TwoFactorAuthenticationMethod two_factor_method = 2;
+	string two_factor_password = 3;
+}
+
+message CredentialAuthenticationResponse {
+	bool authenticated = 1;
+}
+
+message AuthenticateGameConnectionRequest {
+    uint64 realm_id            = 1;
+    uint32 client_build        = 2;
+    string client_account      = 3;
+    string client_game_account = 4;
+    string client_ip_address   = 5;
+    bytes  digest              = 6;
+	// AKA "seed"
+    bytes  local_challenge     = 7; 
+    // AKA "salt"
+	bytes  server_challenge    = 8;
+}
+
+message AuthenticateGameConnectionResponse {
+    AccountTier tier             = 1;
+    bytes       session_key      = 2;  
+    uint64      account_id       = 3;
+    uint64      game_account_id  = 4;
+    string      locale           = 5;
+}
+
+message GenerateLoginTicketRequest {
+	string credential = 1;
+}
+
+message GenerateLoginTicketResponse {
+	string ticket = 1;
+}
+
+service AuthService {
+	// Attempt to sign in with the given credentials
+	// If unauthorized, the request will return an error
+    rpc Login(LoginRequest) returns (LoginResponse) {}
+
+	// Destroys the web token and prevents further use of it
+	rpc Logout(LogoutRequest) returns (LogoutResponse) {}
+
+	// Generate a login ticket
+	rpc GenerateLoginTicket(GenerateLoginTicketRequest) returns (GenerateLoginTicketResponse) {}
+
+	// Checks the status of a credential
+	rpc GetCredentialStatus(CredentialStatusRequest) returns (CredentialStatus) {}
+
+	rpc GetTwoFactorAuthenticationMethods(TwoFactorAuthenticationMethodsRequest) returns (TwoFactorAuthenticationMethodsResponse) {}
+
+	rpc SendEmailAuthenticationCode(SendEmailAuthenticationCodeRequest) returns (SendEmailAuthenticationCodeResponse) {}
+
+	// If token needs 2-factor authentication, use this method to submit the verification code
+	rpc AuthenticateCredential(CredentialAuthenticationRequest) returns (CredentialAuthenticationResponse) {}
+
+	// Sent from world server to verify a client's attempt to connect there
+	// this RPC will be rejected outright if the peer's fingerprint does not match the one on record for RealmID
+	rpc AuthenticateGameConnection(AuthenticateGameConnectionRequest) returns (AuthenticateGameConnectionResponse) {}
+}

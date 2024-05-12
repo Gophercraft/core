@@ -60,9 +60,7 @@ func extractGameObjects() {
 		panic(err)
 	}
 
-	gfl := openFile("DB/GameObjectTemplate.txt")
-	printTimestamp(gfl)
-	wr := openTextWriter(gfl)
+	wr := openTextFile("DB/GameObjectTemplate.txt")
 
 	for _, v := range gtt {
 		data := make([]uint32, 24)
@@ -90,7 +88,7 @@ func extractGameObjects() {
 		}
 	}
 
-	gfl.Close()
+	wr.close()
 
 	gtt = nil
 }

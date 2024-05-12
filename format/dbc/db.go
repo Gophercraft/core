@@ -5,15 +5,15 @@ import (
 
 	"github.com/Gophercraft/core/format/dbc/dbd"
 	"github.com/Gophercraft/core/format/dbc/dbdefs"
-	"github.com/Gophercraft/core/vsn"
+	"github.com/Gophercraft/core/version"
 )
 
 type DB struct {
-	Build vsn.Build
+	Build version.Build
 	Table []*Table
 }
 
-func NewDB(v vsn.Build) *DB {
+func NewDB(v version.Build) *DB {
 	return &DB{
 		Build: v,
 	}

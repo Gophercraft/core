@@ -19,10 +19,7 @@ func extractExpForLevel() {
 		panic(err)
 	}
 
-	fl := openFile("DB/LevelExperience.txt")
-	printTimestamp(fl)
-	wr := openTextWriter(fl)
-
+	wr := openTextFile("DB/LevelExperience.txt")
 	exp := models.LevelExperience{}
 
 	for _, lexp := range levelXP {
@@ -33,5 +30,5 @@ func extractExpForLevel() {
 		panic(err)
 	}
 
-	fl.Close()
+	wr.close()
 }

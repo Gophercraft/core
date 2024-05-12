@@ -7,7 +7,7 @@ import (
 	"github.com/Gophercraft/core/i18n"
 	"github.com/Gophercraft/core/packet/update"
 	"github.com/Gophercraft/core/realm/wdb/models"
-	"github.com/Gophercraft/core/vsn"
+	"github.com/Gophercraft/core/version"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/superp00t/etc"
 )
@@ -174,7 +174,7 @@ func (it ItemTemplate) GetItemStat(idx int) models.ItemStat {
 
 	var mod models.ItemMod
 
-	if err := mod.Resolve(vsn.Alpha, uint32(code)); err != nil {
+	if err := mod.Resolve(version.Alpha, uint32(code)); err != nil {
 		panic(err)
 	}
 

@@ -5,7 +5,7 @@ import (
 	"regexp"
 )
 
-var alnum = regexp.MustCompile("^[a-zA-Z]+$")
+var alnum = regexp.MustCompile("[[:alpha:]]")
 
 var (
 	ErrUsernameCannotBeEmpty = errors.New("login: username cannot be empty")
@@ -45,7 +45,7 @@ func PasswordValidate(in string) error {
 
 	input := []rune(in)
 
-	if len(input) > 16 {
+	if len(input) > 128 {
 		return ErrPasswordTooLong
 	}
 

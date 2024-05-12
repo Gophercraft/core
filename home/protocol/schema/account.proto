@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+package account;
+
+option go_package = "github.com/Gophercraft/core/home/protocol/pb/account";
+
+import "google/protobuf/timestamp.proto";
+import "auth.proto";
+
+message GameAccountStatus {
+  string name = 1;
+  uint64 id = 2;
+  bool active = 3;
+  uint32 characters = 4;
+  bool banned = 5;
+  bool suspended = 6;
+  google.protobuf.Timestamp suspension_lift_time = 7;
+}
+
+message AccountStatusRequest {
+  string credential = 1;
+  uint64 id = 2;
+}
+
+message AccountStatus {
+  string name = 1;
+  uint64 id = 2;
+  auth.AccountTier tier = 3;
+  string email = 4;
+  google.protobuf.Timestamp creation_time = 5;
+  bool email_verified = 6;
+  auth.TwoFactorAuthenticationMethod preferred_two_factor_authentication_method = 7;
+  bool authenticator = 8;
+  bool locked = 9;
+  bool suspended = 10;
+  google.protobuf.Timestamp suspension_lift_time = 11;
+  repeated GameAccountStatus game_accounts = 12;
+}
+
+message AccountCreateRequest {
+  string credential = 1;
+  auth.AccountTier tier = 2;
+  string email = 3;
+  string name = 4;
+  string password = 5;
+}
+
+message AccountCreateResponse {
+  uint64 id = 1;
+  string name = 2;
+}
+
+service AccountService {
+  // Get the account status of a particular account ID
+  // You can always get the status of your own account, but to view the status
+  // of someone else's account you may require a certain permission
+  rpc GetAccountStatus(AccountStatusRequest) returns (AccountStatus) {}
+
+  rpc CreateAccount(AccountCreateRequest) returns (AccountCreateResponse) {}
+}
