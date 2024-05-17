@@ -1,14 +1,12 @@
 # What's a datapack?
 
-Datapacks are Gophercraft's method for loading data. They fulfil
-
 All datapacks are essentially folders containing text files. The folder can be archived as a ZIP, but if so it must use forward-slashes '/'.
 
 The most important datapacks are **Base Datapacks.** These are extracted from a game content archive using the Gophercraft Wizard.
 
-The base datapack !db.zip contains fundamental information about a game client. Without this you won't get very far. It is a relatively small zip file.
+The base datapack `!db.zip` contains fundamental information about a game client. Without this you won't get very far. It is a relatively small zip file.
 
-The base datapack !maps.zip contains bulk map geometry, and is of course much larger. You don't need to extract this, but when you do, creature AI gets smarter and your world becomes more robust against cheaters.
+The base datapack `!maps.zip` contains bulk map geometry, and is of course much larger. You don't need to extract this, but when you do, creature AI gets smarter and your world becomes more robust against cheaters.
 
 You'll also need a **Content Datapack**. These packs contain creature, item and gameobject templates, spawn positions and scripts.
 
@@ -20,7 +18,7 @@ You can clone or download these repositories as zips and put them in your world'
 
 # Text files
 
-Gophercraft makes use of [a minimal text format inspired by JSON](https://github.com/Gophercraft/text).
+Gophercraft makes use of [a custom text format inspired by JSON and CSV](https://github.com/Gophercraft/text).
 
 ## Pack.txt
 
@@ -30,15 +28,27 @@ Example:
 
 ```c
 {
+  ID "example_pack"
   Name "Name your pack"
-  Author "Credit your authors here"
+  Version 1
+  MinimumCoreVersion 0.7.1 
   Description "Yada yada tell us about what this does"
-  MinCoreVersion 0.7.1 // the current Gophercraft core version this is tested against.
-  PackVersion 1
-  URL "put URL to project home (optional)"
-  Depends
+  Repository "put URL to project Git repository or ZIP file (optional)"
+  Authors
   {
-    "Name of a pack this pack depends on" 
+    "Credit your authors here"
+  }
+  Dependencies
+  {
+    {
+      ID "put the ID of the needed datapack"
+      MinimumVersion 1
+    }
+  }
+  OverrideTables
+  {
+    "Name of table that you want to override"
+    "Override means to replace every previous record"
   }
 }
 ```
