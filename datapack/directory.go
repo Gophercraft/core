@@ -61,3 +61,7 @@ func (d *directory) Open(path string) (file io.ReadCloser, err error) {
 	realpath := filepath.Join(d.path, path)
 	return os.Open(realpath)
 }
+
+func (d *directory) Close() (err error) {
+	return
+}
