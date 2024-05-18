@@ -33,6 +33,15 @@ func NewCreator(path string) (creator *Creator, err error) {
 
 func (creator *Creator) Open(path string) (file *os.File, err error) {
 	realpath := filepath.Join(creator.directory, path)
+
+	// Ensure existence of base directoreis
+
+	containing_directory_path := filepath.Dir(realpath)
+	err = os.MkdirAll(containing_directory_path, 0755)
+	if err != nil {
+		return
+	}
+
 	return os.Open(realpath)
 }
 

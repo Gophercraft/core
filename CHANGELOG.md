@@ -2,6 +2,8 @@
 
 - Massive overhaul to both Home and World servers.
 
+- BattleNet RPC code has been rewritten from the ground up using [Protoss](https://github.com/Gophercraft/protoss), using a modified Go-GRPC code generator. Writing BNet services/clients should be much easier now. 
+
 - Home now has optional services - only the servers included in your home.txt file are used.
 
 # 0.5.1 Release

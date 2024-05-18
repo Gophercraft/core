@@ -6,7 +6,7 @@ import (
 	"crypto/subtle"
 	"strings"
 
-	"github.com/Gophercraft/core/crypto"
+	"github.com/Gophercraft/core/crypto/hashutil"
 	"github.com/Gophercraft/core/home/models"
 	"github.com/Gophercraft/core/home/protocol/pb/auth"
 	"github.com/Gophercraft/core/version"
@@ -101,7 +101,7 @@ func (provider *auth_provider) authenticate_game_connection_modern(auth_game_con
 	sessionKeyHmac.Write(sessionKeySeed)
 
 	session_key = make([]byte, 40)
-	skg := crypto.NewSessionKeyGenerator(sha256.New, sessionKeyHmac.Sum(nil))
+	skg := hashutil.NewSessionKeyGenerator(sha256.New, sessionKeyHmac.Sum(nil))
 	skg.Read(session_key)
 
 	log.Dump("sessionKey", session_key)

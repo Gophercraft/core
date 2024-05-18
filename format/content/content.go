@@ -9,6 +9,7 @@ import (
 	"github.com/Gophercraft/core/version/detection"
 )
 
+// Volume defines the minimum access to a fully-loaded game archive.
 type Volume interface {
 	// returns the content.Type
 	Type() Type
