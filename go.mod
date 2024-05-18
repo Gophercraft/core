@@ -1,11 +1,13 @@
 module github.com/Gophercraft/core
 
-go 1.22
+go 1.22.0
+
+toolchain go1.22.3
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.6
 	github.com/Gophercraft/log v0.0.0-20240214234900-fcacaad0d20e
-	github.com/Gophercraft/text v0.0.0-20221206232200-55f1d00426ea
+	github.com/Gophercraft/text v0.7.1
 	github.com/Velocidex/binparsergen v0.1.0
 	github.com/Velocidex/go-pe v0.1.0
 	github.com/arl/math32 v0.2.0

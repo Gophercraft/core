@@ -51,6 +51,10 @@ github.com/Gophercraft/text v0.0.0-20221116003106-d94028c43f3e h1:IX3pevAbosWQpq
 github.com/Gophercraft/text v0.0.0-20221116003106-d94028c43f3e/go.mod h1:u2DNBR4l2+TRqzDr1K72yROhVOo01kWPsGRzyAODoBI=
 github.com/Gophercraft/text v0.0.0-20221206232200-55f1d00426ea h1:BwzuT02d/kI/rOAXKSRhPwZyMcIZkMUzUS8e2wkEKsI=
 github.com/Gophercraft/text v0.0.0-20221206232200-55f1d00426ea/go.mod h1:u2DNBR4l2+TRqzDr1K72yROhVOo01kWPsGRzyAODoBI=
+github.com/Gophercraft/text v0.7.0 h1:18BLaSOxubwOeETUsMy6eCbF9r/x0/CvT8FYLjY8HXE=
+github.com/Gophercraft/text v0.7.0/go.mod h1:YBKflrmiAxQzOOKmov8KZYLDb7WeHinIk5EPmsGEdTc=
+github.com/Gophercraft/text v0.7.1 h1:z3jvq6uRilFqnByDZGLs8Cnd/HrQJYjikMEqD7nswKI=
+github.com/Gophercraft/text v0.7.1/go.mod h1:YBKflrmiAxQzOOKmov8KZYLDb7WeHinIk5EPmsGEdTc=
 github.com/JoshVarga/blast v0.0.0-20210808061142-eadad17358e8 h1:9bbQDlx6h7MyNk3Ljr5wNqFQ5gEhX7pE4j7EHL86/2Q=
 github.com/JoshVarga/blast v0.0.0-20210808061142-eadad17358e8/go.mod h1:rwSKMTLI/8tbw6YDRqtd3Hc0OI3eP/tSTVKshyd8dO8=
 github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible/go.mod h1:r7JcOSlj0wfOMncg0iLm8Leh48TZaKVeNIfJntJ2wa0=
