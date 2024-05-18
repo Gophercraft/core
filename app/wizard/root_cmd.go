@@ -35,4 +35,7 @@ func init() {
 	account_cmd.AddCommand(account_status_cmd)
 	account_cmd.AddCommand(account_create_cmd)
 	root_cmd.AddCommand(account_cmd)
+
+	home_cmd.AddCommand(home_create_cmd)
+	root_cmd.AddCommand(home_cmd)
 }
