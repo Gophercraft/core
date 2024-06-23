@@ -29,7 +29,28 @@ message LockStatus {
   bool locked = 1;
 }
 
+message FileHeader {
+  // name like "backup-____.zip"
+  // cannot contain any slashes
+  string name = 1;
+  uint64 size = 2;
+}
+
+message FileChunk {
+  bytes data = 1;
+}
+
+message FileDownload {
+  oneof data {
+    FileHeader header = 1;
+    FileChunk chunk = 2;
+  }
+}
+
 service AdminService {
+  rpc TakeBackup(TakeBackupRequest) returns (stream FileDownload) {}
+
+  // Actions that govern an entire account (username/password)
   rpc BanAccount(AccountRequest) returns (BanStatus) {}
   rpc UnbanAccount(AccountRequest) returns (BanStatus) {}
   rpc SuspendAccount(SuspendAccountRequest) returns (BanStatus) {}
@@ -37,6 +58,7 @@ service AdminService {
   rpc LockAccount(AccountRequest) returns (LockStatus) {}
   rpc UnlockAccount(AccountRequest) returns (LockStatus) {}
 
+  // Actions that govern only a specific game account (game profile that is the child of a parent account)
   rpc BanGameAccount(AccountRequest) returns (BanStatus) {}
   rpc UnbanGameAccount(AccountRequest) returns (BanStatus) {}
   rpc SuspendGameAccount(SuspendAccountRequest) returns (BanStatus) {}
