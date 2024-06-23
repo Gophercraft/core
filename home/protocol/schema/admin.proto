@@ -47,6 +47,8 @@ message FileDownload {
   }
 }
 
+message TakeBackupRequest {}
+
 service AdminService {
   rpc TakeBackup(TakeBackupRequest) returns (stream FileDownload) {}
 
