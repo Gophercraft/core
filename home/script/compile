@@ -1,1 +1,1 @@
-protoc --go_opt=module=github.com/Gophercraft/core/home/protocol --go-grpc_opt=module=github.com/Gophercraft/core/home/protocol -I schema schema/*.proto --go_out=. --go-grpc_out=.
+protoc --go_opt=module=github.com/Gophercraft/core/home/protocol --go-grpc_opt=module=github.com/Gophercraft/core/home/protocol -I home/protocol/schema home/protocol/schema/*.proto --go_out=./home/protocol --go-grpc_out=./home/protocol
