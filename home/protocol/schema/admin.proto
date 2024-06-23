@@ -47,9 +47,12 @@ message FileDownload {
   }
 }
 
-message TakeBackupRequest {}
+message TakeBackupRequest {
+  string credential = 1;
+}
 
 service AdminService {
+  // Actions that govern the entire server
   rpc TakeBackup(TakeBackupRequest) returns (stream FileDownload) {}
 
   // Actions that govern an entire account (username/password)

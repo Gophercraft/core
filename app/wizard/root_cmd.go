@@ -37,5 +37,7 @@ func init() {
 	root_cmd.AddCommand(account_cmd)
 
 	home_cmd.AddCommand(home_create_cmd)
+	home_backup_cmd.Flags().StringP("output-file", "o", "", "the name to download the backup file to")
+	home_cmd.AddCommand(home_backup_cmd)
 	root_cmd.AddCommand(home_cmd)
 }

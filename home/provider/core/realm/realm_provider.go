@@ -93,7 +93,7 @@ func (provider *realm_provider) Announce(ctx context.Context, announce_request *
 	realm_table.Where(query.Eq("ID", announce_request.Id)).Delete()
 	realm_table.Insert(&models.Realm{
 		ID:              announce_request.Id,
-		Name:            announce_request.Name,
+		Name:            announce_request.LongName,
 		Build:           version.Build(announce_request.Build),
 		Type:            models.RealmType(announce_request.Type),
 		Address:         announce_request.Address,

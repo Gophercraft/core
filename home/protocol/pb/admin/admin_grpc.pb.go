@@ -22,6 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AdminServiceClient interface {
+	// Actions that govern the entire server
 	TakeBackup(ctx context.Context, in *TakeBackupRequest, opts ...grpc.CallOption) (AdminService_TakeBackupClient, error)
 	// Actions that govern an entire account (username/password)
 	BanAccount(ctx context.Context, in *AccountRequest, opts ...grpc.CallOption) (*BanStatus, error)
@@ -171,6 +172,7 @@ func (c *adminServiceClient) UnsuspendGameAccount(ctx context.Context, in *Accou
 // All implementations must embed UnimplementedAdminServiceServer
 // for forward compatibility
 type AdminServiceServer interface {
+	// Actions that govern the entire server
 	TakeBackup(*TakeBackupRequest, AdminService_TakeBackupServer) error
 	// Actions that govern an entire account (username/password)
 	BanAccount(context.Context, *AccountRequest) (*BanStatus, error)

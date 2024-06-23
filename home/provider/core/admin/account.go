@@ -15,8 +15,8 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-// Find the account
-func (provider *admin_provider) validate_access(ctx context.Context, credential string) (account *home_models.Account, err error) {
+// Find the account and check if it's at least a moderator
+func (provider *admin_provider) validate_moderator_access(ctx context.Context, credential string) (account *home_models.Account, err error) {
 	var (
 		web_token_status auth.WebTokenStatus
 		address          string
@@ -38,6 +38,36 @@ func (provider *admin_provider) validate_access(ctx context.Context, credential 
 	}
 
 	if account.Tier < auth.AccountTier_MODERATOR {
+		err = fmt.Errorf("home/provider/core/admin: you must be moderator or higher to use the admin service")
+		return
+	}
+
+	return
+}
+
+// Find the account and check if it's at least a moderator
+func (provider *admin_provider) validate_admin_access(ctx context.Context, credential string) (account *home_models.Account, err error) {
+	var (
+		web_token_status auth.WebTokenStatus
+		address          string
+	)
+
+	address, err = protocol.GetPeerAddress(ctx)
+	if err != nil {
+		return
+	}
+
+	account, web_token_status, err = login.CheckCredential(provider.home_db, home_models.Login_Core, credential, address, "")
+	if err != nil {
+		return
+	}
+
+	if web_token_status != auth.WebTokenStatus_AUTHENTICATED {
+		err = fmt.Errorf("home/provider/core/admin: credential is expired, or has not been authenticated fully")
+		return
+	}
+
+	if account.Tier < auth.AccountTier_ADMIN {
 		err = fmt.Errorf("home/provider/core/admin: you must be moderator or higher to use the admin service")
 		return
 	}
@@ -88,7 +118,7 @@ func (provider *admin_provider) BanAccount(ctx context.Context, ban_request *adm
 		banned_account *home_models.Account
 		updated        uint64
 	)
-	admin_account, err = provider.validate_access(ctx, ban_request.Credential)
+	admin_account, err = provider.validate_moderator_access(ctx, ban_request.Credential)
 	if err != nil {
 		return
 	}
@@ -124,7 +154,7 @@ func (provider *admin_provider) UnbanAccount(ctx context.Context, unban_request 
 		unbanned_account *home_models.Account
 		updated          uint64
 	)
-	admin_account, err = provider.validate_access(ctx, unban_request.Credential)
+	admin_account, err = provider.validate_moderator_access(ctx, unban_request.Credential)
 	if err != nil {
 		return
 	}
@@ -159,7 +189,7 @@ func (provider *admin_provider) LockAccount(ctx context.Context, lock_request *a
 		locked_account *home_models.Account
 		updated        uint64
 	)
-	admin_account, err = provider.validate_access(ctx, lock_request.Credential)
+	admin_account, err = provider.validate_moderator_access(ctx, lock_request.Credential)
 	if err != nil {
 		return
 	}
@@ -194,7 +224,7 @@ func (provider *admin_provider) UnlockAccount(ctx context.Context, unlock_reques
 		unlocked_account *home_models.Account
 		updated          uint64
 	)
-	admin_account, err = provider.validate_access(ctx, unlock_request.Credential)
+	admin_account, err = provider.validate_moderator_access(ctx, unlock_request.Credential)
 	if err != nil {
 		return
 	}
@@ -229,7 +259,7 @@ func (provider *admin_provider) SuspendAccount(ctx context.Context, suspend_requ
 		suspended_account *home_models.Account
 		updated           uint64
 	)
-	admin_account, err = provider.validate_access(ctx, suspend_request.Credential)
+	admin_account, err = provider.validate_moderator_access(ctx, suspend_request.Credential)
 	if err != nil {
 		return
 	}
@@ -269,7 +299,7 @@ func (provider *admin_provider) UnsuspendAccount(ctx context.Context, unsuspend_
 		unsuspended_account *home_models.Account
 		updated             uint64
 	)
-	admin_account, err = provider.validate_access(ctx, unsuspend_request.Credential)
+	admin_account, err = provider.validate_moderator_access(ctx, unsuspend_request.Credential)
 	if err != nil {
 		return
 	}

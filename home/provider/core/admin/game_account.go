@@ -55,7 +55,7 @@ func (provider *admin_provider) BanGameAccount(ctx context.Context, ban_request 
 		banned_game_account *home_models.GameAccount
 		updated             uint64
 	)
-	admin_account, err = provider.validate_access(ctx, ban_request.Credential)
+	admin_account, err = provider.validate_moderator_access(ctx, ban_request.Credential)
 	if err != nil {
 		return
 	}
@@ -89,7 +89,7 @@ func (provider *admin_provider) UnbanGameAccount(ctx context.Context, unban_requ
 		unbanned_game_account *home_models.GameAccount
 		updated               uint64
 	)
-	admin_account, err = provider.validate_access(ctx, unban_request.Credential)
+	admin_account, err = provider.validate_moderator_access(ctx, unban_request.Credential)
 	if err != nil {
 		return
 	}
@@ -123,7 +123,7 @@ func (provider *admin_provider) SuspendGameAccount(ctx context.Context, suspend_
 		suspended_game_account *home_models.GameAccount
 		updated                uint64
 	)
-	admin_account, err = provider.validate_access(ctx, suspend_request.Credential)
+	admin_account, err = provider.validate_moderator_access(ctx, suspend_request.Credential)
 	if err != nil {
 		return
 	}
@@ -163,7 +163,7 @@ func (provider *admin_provider) UnsuspendGameAccount(ctx context.Context, unsusp
 		unsuspended_game_account *home_models.GameAccount
 		updated                  uint64
 	)
-	admin_account, err = provider.validate_access(ctx, unsuspend_request.Credential)
+	admin_account, err = provider.validate_moderator_access(ctx, unsuspend_request.Credential)
 	if err != nil {
 		return
 	}
