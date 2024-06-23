@@ -37,7 +37,7 @@ require (
 
 require (
 	github.com/Gophercraft/mpq v0.0.0-20240208051446-24ede6ccb051 // indirect
-	github.com/Gophercraft/phylactery v0.0.0-20240416221758-cb527ea971f7 // indirect
+	github.com/Gophercraft/phylactery v0.0.0-20240623212537-c4073b1aef22 // indirect
 	github.com/JoshVarga/blast v0.0.0-20210808061142-eadad17358e8 // indirect
 	github.com/adrg/strutil v0.3.0 // indirect
 	github.com/boombuler/barcode v1.0.1-0.20190219062509-6c824513bacc // indirect

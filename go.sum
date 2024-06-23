@@ -45,6 +45,10 @@ github.com/Gophercraft/phylactery v0.0.0-20240321222112-0fe010ddd5d9 h1:mo3/YXNH
 github.com/Gophercraft/phylactery v0.0.0-20240321222112-0fe010ddd5d9/go.mod h1:H3uBjr8OXSuNxdpbMJh90vPMZ1Oq2vnd3jsIr4QaZFw=
 github.com/Gophercraft/phylactery v0.0.0-20240416221758-cb527ea971f7 h1:E4gVSeOK186r1RDy7ye7xzQAp81WN7O5D6PZZII4cv4=
 github.com/Gophercraft/phylactery v0.0.0-20240416221758-cb527ea971f7/go.mod h1:H3uBjr8OXSuNxdpbMJh90vPMZ1Oq2vnd3jsIr4QaZFw=
+github.com/Gophercraft/phylactery v0.0.0-20240617022757-0460edbd330d h1:BXgrTeQJzjGi8Z6/pnoMNqJKxgCtbMG40nKqZvNSApI=
+github.com/Gophercraft/phylactery v0.0.0-20240617022757-0460edbd330d/go.mod h1:H3uBjr8OXSuNxdpbMJh90vPMZ1Oq2vnd3jsIr4QaZFw=
+github.com/Gophercraft/phylactery v0.0.0-20240623212537-c4073b1aef22 h1:JvZNHh5ODDMFCD2ttVEqlKLG8Sa+ISPvnuNEm1ylNg4=
+github.com/Gophercraft/phylactery v0.0.0-20240623212537-c4073b1aef22/go.mod h1:H3uBjr8OXSuNxdpbMJh90vPMZ1Oq2vnd3jsIr4QaZFw=
 github.com/Gophercraft/text v0.0.0-20221108204146-739ab2ded1e7 h1:5J6hxAFf7JPzwyO77999mlMFZ41n+NaZ5bw1E/qZIN4=
 github.com/Gophercraft/text v0.0.0-20221108204146-739ab2ded1e7/go.mod h1:u2DNBR4l2+TRqzDr1K72yROhVOo01kWPsGRzyAODoBI=
 github.com/Gophercraft/text v0.0.0-20221116003106-d94028c43f3e h1:IX3pevAbosWQpqUojjB02eG6oYn0K9RjCxojcd+0pac=
